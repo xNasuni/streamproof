@@ -1,0 +1,19 @@
+{
+  "required": true,
+  "package": "win.transgirls.streamproof.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "overwrites": {
+    "requireAnnotations": true
+  },
+  "client": [
+    "EarlyHookMixin",
+    "GameRenderMixin",
+    "SwapMixin",
+    "components.F3Screen"
+  ]
+}

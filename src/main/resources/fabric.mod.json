@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "id": "streamproof",
+  "version": "${version}",
+  "name": "Streamproof",
+  "description": "This mod lets you hide specific things from rendering in OBS",
+  "authors": [
+    "xNasuni"
+  ],
+  "contact": {
+    "homepage": "https://transgirls.win/",
+    "sources": "https://github.com/xNasuni/streamproof"
+  },
+  "license": "MIT",
+  "icon": "assets/streamproof/icon.png",
+  "environment": "*",
+  "accessWidener": "streamproof.aw",
+  "entrypoints": {
+    "client": [
+      "win.transgirls.streamproof.Streamproof"
+    ]
+  },
+  "mixins": [
+    {
+      "config": "streamproof.mixins.json",
+      "environment": "client"
+    }
+  ],
+  "depends": {
+    "fabricloader": "*",
+    "minecraft": "*",
+    "java": ">=17",
+    "fabric-api": "*"
+  },
+  "suggests": {
+  }
+}
