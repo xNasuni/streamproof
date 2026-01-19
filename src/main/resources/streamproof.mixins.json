@@ -11,9 +11,8 @@
     "requireAnnotations": true
   },
   "client": [
-    "EarlyHookMixin",
     "GameRenderMixin",
-    "SwapMixin",
-    "components.F3Screen"
+    "components.DebugOverlay",
+    "components.DebugHitboxes"
   ]
 }

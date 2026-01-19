@@ -1,25 +1,28 @@
 package win.transgirls.streamproof.tools;
 
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.renderer.MultiBufferSource;
+import win.transgirls.streamproof.types.RenderData;
 
 import java.util.ArrayList;
 import java.util.function.Consumer;
 
 public class RenderQueue {
-    ArrayList<Consumer<GuiGraphics>> renderQueue = new ArrayList<>();
+    ArrayList<Consumer<RenderData>> renderQueue = new ArrayList<>();
 
-    public int size() {
-        return renderQueue.size();
+    public void add(Consumer<RenderData> consumer) {
+        renderQueue.add(consumer);
     }
 
-    public void add(Consumer<GuiGraphics> runnable) {
-        renderQueue.add(runnable);
-    }
+    public void release(GuiGraphics g, MultiBufferSource.BufferSource b) {
+        RenderData data = new RenderData();
+        data.graphics = g;
+        data.buffer = b;
 
-    public void release(GuiGraphics graphics) {
-        renderQueue.forEach((runnable) -> {
-            runnable.accept(graphics);
+        renderQueue.forEach((consumer) -> {
+            consumer.accept(data);
         });
+
         renderQueue.clear();
     }
 }

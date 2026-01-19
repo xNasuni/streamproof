@@ -10,12 +10,11 @@ import net.minecraft.client.gui.components.DebugScreenOverlay;
 import java.util.List;
 
 @Mixin(DebugScreenOverlay.class)
-public class F3Screen {
+public class DebugOverlay {
     @WrapMethod(method = "renderLines")
     private void wrapRender(GuiGraphics guiGraphics, List<String> list, boolean bl, Operation<Void> original) {
-        Streamproof.renderQueue.add((graphics) -> {
-//            original.call(graphics, list, bl);
-            original.call(guiGraphics, list, bl);
+        Streamproof.renderQueue.add((data) -> {
+            original.call(data.graphics, list, bl);
         });
     }
 }
