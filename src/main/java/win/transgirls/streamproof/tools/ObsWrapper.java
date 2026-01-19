@@ -16,12 +16,14 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import static win.transgirls.streamproof.Streamproof.LOGGER;
+import static win.transgirls.streamproof.Streamproof.minhook;
 
 public class ObsWrapper {
     private static final String obsDll = "(?i)^graphics-hook(32|64)\\.dll$";
     private final long pid;
+    public volatile boolean running = true;
+    public boolean hooked = true;
     private ScheduledExecutorService obsDetector;
-    private volatile boolean running = true;
 
     public ObsWrapper() {
         this.pid = ProcessHandle.current().pid();
@@ -55,8 +57,6 @@ public class ObsWrapper {
     }
 
     private void initHook() {
-        MinHook minhook = Streamproof.minhook;
-
         Pointer module = Kernel32.INSTANCE.GetModuleHandleA("opengl32.dll");
         Pointer proc = Kernel32.INSTANCE.GetProcAddress(module, "wglSwapBuffers");
 
@@ -74,8 +74,28 @@ public class ObsWrapper {
 
         int hr2 = minhook.MH_EnableHook(proc);
 
-        Streamproof.LOGGER.info("opengl32.dll->wglSwapBuffers hooked after OBS ({}, {}, {})",
-                Streamproof.wglSwapBuffersObs.getValue(), hr, hr2);
+        if (hr == 0 && hr2 == 0) {
+            hooked = true;
+            Streamproof.LOGGER.info("opengl32.dll->wglSwapBuffers hooked after OBS ({}, {}, {})",
+                    Streamproof.wglSwapBuffersObs.getValue(), hr, hr2);
+        } else {
+            LOGGER.warn("opengl32.dll-wglSwapBuffers hook failed while attempting to create or enable! Create={}, Enable={}", hr, hr2);
+        }
+    }
+
+    public void stop() {
+        if (hooked) {
+            Pointer module = Kernel32.INSTANCE.GetModuleHandleA("opengl32.dll");
+            Pointer proc = Kernel32.INSTANCE.GetProcAddress(module, "wglSwapBuffers");
+
+            int hr = minhook.MH_RemoveHook(proc);
+            if (hr == 0) {
+                hooked = false;
+                LOGGER.info("opengl32.dll->wglSwapBuffers unhooked ({}, {})", proc, hr);
+            } else {
+                LOGGER.warn("opengl32.dll->wglSwapBuffers unhook failed while attempting to remove! Remove={}", hr);
+            }
+        }
     }
 
     public boolean isOBSHooked() {

@@ -5,14 +5,20 @@
   "mixins": [
   ],
   "injectors": {
-    "defaultRequire": 1
+    "defaultRequire": 0
   },
   "overwrites": {
     "requireAnnotations": true
   },
   "client": [
     "GameRenderMixin",
-    "components.DebugOverlay",
-    "components.DebugHitboxes"
+    "GameTickMixin",
+    "components.base.DebugHitboxes",
+    "components.base.DebugOverlay",
+    "components.base.FocusedChatEditOverlay",
+    "components.base.FocusedChatSuggestionOverlay",
+    "components.base.UnfocusedChatOverlay",
+    "components.external.InventoryHudMixin",
+    "components.external.XaerosMinimapMixin"
   ]
 }

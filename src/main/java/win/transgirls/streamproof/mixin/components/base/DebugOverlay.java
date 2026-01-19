@@ -1,4 +1,4 @@
-package win.transgirls.streamproof.mixin.components;
+package win.transgirls.streamproof.mixin.components.base;
 
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;

@@ -2,13 +2,14 @@ package win.transgirls.streamproof.tools;
 
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.MultiBufferSource;
+import win.transgirls.streamproof.Streamproof;
 import win.transgirls.streamproof.types.RenderData;
 
 import java.util.ArrayList;
 import java.util.function.Consumer;
 
 public class RenderQueue {
-    ArrayList<Consumer<RenderData>> renderQueue = new ArrayList<>();
+    private ArrayList<Consumer<RenderData>> renderQueue = new ArrayList<>();
 
     public void add(Consumer<RenderData> consumer) {
         renderQueue.add(consumer);
@@ -23,6 +24,10 @@ public class RenderQueue {
             consumer.accept(data);
         });
 
+        renderQueue.clear();
+    }
+
+    public void clear() {
         renderQueue.clear();
     }
 }

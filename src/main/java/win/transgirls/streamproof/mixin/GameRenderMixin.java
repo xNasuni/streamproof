@@ -52,49 +52,47 @@ public class GameRenderMixin {
     @Shadow
     @Final
     private RenderBuffers renderBuffers;
-
-    @Shadow
-    @Final
-    private LevelRenderState levelRenderState;
-
+    
     @Inject(method = "render", at = @At("TAIL"))
     private void injectRender(DeltaTracker deltaTracker, boolean bl, CallbackInfo ci) {
-        Streamproof.renderSecrets = () -> {
-            ProfilerFiller profilerFiller = Profiler.get();
-            RenderTarget renderTarget = this.minecraft.getMainRenderTarget();
+        if (Streamproof.obsWrapper != null && Streamproof.obsWrapper.hooked) {
+            Streamproof.renderSecrets = () -> {
+                ProfilerFiller profilerFiller = Profiler.get();
+                RenderTarget renderTarget = this.minecraft.getMainRenderTarget();
 
-            this.guiRenderState.reset();
+                this.guiRenderState.reset();
 
-            int i = (int) this.minecraft.mouseHandler.getScaledXPos(this.minecraft.getWindow());
-            int j = (int) this.minecraft.mouseHandler.getScaledYPos(this.minecraft.getWindow());
+                int i = (int) this.minecraft.mouseHandler.getScaledXPos(this.minecraft.getWindow());
+                int j = (int) this.minecraft.mouseHandler.getScaledYPos(this.minecraft.getWindow());
 
-            profilerFiller.popPush("streamproofGuiRendering");
+                profilerFiller.popPush("streamproofGuiRendering");
 
-            GuiGraphics graphics = new GuiGraphics(this.minecraft, this.guiRenderState, i, j);
-            MultiBufferSource.BufferSource buffer = this.renderBuffers.bufferSource();
+                GuiGraphics graphics = new GuiGraphics(this.minecraft, this.guiRenderState, i, j);
+                MultiBufferSource.BufferSource buffer = this.renderBuffers.bufferSource();
 
-            this.guiRenderState.reset();
-            Streamproof.renderQueue.release(graphics, buffer);
-            buffer.endBatch();
+                this.guiRenderState.reset();
+                Streamproof.renderQueue.release(graphics, buffer);
+//            buffer.endBatch();
 
-            this.guiRenderer.render(this.fogRenderer.getBuffer(FogRenderer.FogMode.NONE));
-            this.guiRenderer.incrementFrameNumber();
+                this.guiRenderer.render(this.fogRenderer.getBuffer(FogRenderer.FogMode.NONE));
+                this.guiRenderer.incrementFrameNumber();
 
-            profilerFiller.pop();
-            this.submitNodeStorage.endFrame();
+                profilerFiller.pop();
+                this.submitNodeStorage.endFrame();
 
-            profilerFiller.popPush("streamproofBlit");
-            if (!this.minecraft.getWindow().isMinimized()) {
-                renderTarget.blitToScreen();
-            }
-            profilerFiller.pop();
+                profilerFiller.popPush("streamproofBlit");
+                if (!this.minecraft.getWindow().isMinimized()) {
+                    renderTarget.blitToScreen();
+                }
+                profilerFiller.pop();
 
-            profilerFiller.popPush("streamproofUpdateDisplay");
-            if (this.minecraft.tracyFrameCapture != null) {
-                this.minecraft.tracyFrameCapture.upload();
-                this.minecraft.tracyFrameCapture.capture(renderTarget);
-            }
-            profilerFiller.pop();
-        };
+                profilerFiller.popPush("streamproofUpdateDisplay");
+                if (this.minecraft.tracyFrameCapture != null) {
+                    this.minecraft.tracyFrameCapture.upload();
+                    this.minecraft.tracyFrameCapture.capture(renderTarget);
+                }
+                profilerFiller.pop();
+            };
+        }
     }
 }

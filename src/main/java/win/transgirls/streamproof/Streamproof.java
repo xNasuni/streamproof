@@ -1,9 +1,11 @@
 package win.transgirls.streamproof;
 
 import com.sun.jna.Native;
+import com.sun.jna.Pointer;
 import com.sun.jna.ptr.PointerByReference;
 import net.fabricmc.api.ClientModInitializer;
 
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.minecraft.client.Minecraft;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -67,5 +69,9 @@ public class Streamproof implements ClientModInitializer {
 
         Streamproof.obsWrapper = new ObsWrapper();
         LOGGER.info("Streamproof loaded successfully ;3");
+
+        ClientLifecycleEvents.CLIENT_STOPPING.register((minecraft) -> {
+            Streamproof.obsWrapper.stop();
+        });
     }
 }
