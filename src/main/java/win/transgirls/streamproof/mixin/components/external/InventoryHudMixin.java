@@ -11,21 +11,21 @@ import win.transgirls.streamproof.Streamproof;
 public class InventoryHudMixin {
     @WrapMethod(method = "renderArmor")
     private void wrapArmor(@Coerce Object guiGraphics, int width, int height, Operation<Void> original) {
-        Streamproof.renderQueue.add((data) -> {
+        Streamproof.renderQueue.add(guiGraphics, (data) -> {
             original.call(data.graphics, width, height);
         });
     }
 
     @WrapMethod(method = "renderPotion")
-    private void wrapPotion(@Coerce Object context, int width, int height, Operation<Void> original) {
-        Streamproof.renderQueue.add((data) -> {
+    private void wrapPotion(@Coerce Object guiGraphics, int width, int height, Operation<Void> original) {
+        Streamproof.renderQueue.add(guiGraphics, (data) -> {
             original.call(data.graphics, width, height);
         });
     }
 
     @WrapMethod(method = "renderInventory")
-    private void wrapInventory(@Coerce Object gui, @Coerce Object deltaTracker, Operation<Void> original) {
-        Streamproof.renderQueue.add((data) -> {
+    private void wrapInventory(@Coerce Object guiGraphics, @Coerce Object deltaTracker, Operation<Void> original) {
+        Streamproof.renderQueue.add(guiGraphics, (data) -> {
             original.call(data.graphics, deltaTracker);
         });
     }

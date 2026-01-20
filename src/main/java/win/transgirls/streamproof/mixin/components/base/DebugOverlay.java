@@ -2,18 +2,19 @@ package win.transgirls.streamproof.mixin.components.base;
 
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
-import net.minecraft.client.gui.GuiGraphics;
 import org.spongepowered.asm.mixin.Mixin;
 import win.transgirls.streamproof.Streamproof;
-import net.minecraft.client.gui.components.DebugScreenOverlay;
 
 import java.util.List;
 
-@Mixin(DebugScreenOverlay.class)
+import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.hud.DebugHud;
+
+@Mixin(DebugHud.class)
 public class DebugOverlay {
-    @WrapMethod(method = "renderLines")
-    private void wrapRender(GuiGraphics guiGraphics, List<String> list, boolean bl, Operation<Void> original) {
-        Streamproof.renderQueue.add((data) -> {
+    @WrapMethod(method = "drawText")
+    private void wrapRender(DrawContext guiGraphics, List<String> list, boolean bl, Operation<Void> original) {
+        Streamproof.renderQueue.add(guiGraphics, (data) -> {
             original.call(data.graphics, list, bl);
         });
     }

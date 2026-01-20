@@ -1,9 +1,16 @@
 package win.transgirls.streamproof.types;
 
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.render.VertexConsumerProvider;
 
 public class RenderData {
-    public GuiGraphics graphics;
-    public MultiBufferSource.BufferSource buffer;
+    public DrawContext graphics;
+    public VertexConsumerProvider.Immediate buffer;
+
+    public static RenderData with(Object graphics) {
+        RenderData data = new RenderData();
+        data.graphics = (DrawContext) graphics;
+
+        return data;
+    }
 }

@@ -6,12 +6,21 @@ import com.sun.jna.ptr.PointerByReference;
 import net.fabricmc.api.ClientModInitializer;
 
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
-import net.minecraft.client.Minecraft;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.util.Window;
+import net.minecraft.sound.SoundEvent;
+import net.minecraft.util.Identifier;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.lwjgl.glfw.GLFW;
+import win.transgirls.streamproof.imgui.ImGuiImplementation;
+import win.transgirls.streamproof.input.KeyAction;
+import win.transgirls.streamproof.input.Keybind;
+import win.transgirls.streamproof.input.KeyboardMain;
 import win.transgirls.streamproof.types.MinHook;
 import win.transgirls.streamproof.tools.ObsWrapper;
 import win.transgirls.streamproof.tools.RenderQueue;
+import win.transgirls.streamproof.visuals.Interface;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -19,15 +28,30 @@ import java.io.IOException;
 import java.io.InputStream;
 
 public class Streamproof implements ClientModInitializer {
+    public static final String id = "streamproof";
     public static final Logger LOGGER = LogManager.getLogger("Streamproof");
+
+    public static final SoundEvent successSound =
+            SoundEvent.of(Identifier.of("streamproof", "success"));
+    public static final SoundEvent failureSound =
+            SoundEvent.of(Identifier.of("streamproof", "failure"));
 
     public static final RenderQueue renderQueue = new RenderQueue();
     public static ObsWrapper obsWrapper;
-
     public static PointerByReference wglSwapBuffersObs;
-
     public static MinHook minhook = null;
     public static Runnable renderSecrets;
+    public static MinecraftClient client;
+    public static Window window;
+
+    public static void lateInit() {
+        ImGuiImplementation.create(window.getHandle());
+
+        Interface.init();
+        KeyboardMain.on(new Keybind(KeyAction.PRESSING, GLFW.GLFW_KEY_RIGHT_SHIFT, () -> {
+            Interface.visible = !Interface.visible;
+        }));
+    }
 
     @Override
     public void onInitializeClient() {
@@ -47,7 +71,7 @@ public class Streamproof implements ClientModInitializer {
             throw new RuntimeException("Couldn't find MinHook Dll");
         }
 
-        File nativeDir = new File(Minecraft.getInstance().gameDirectory, "native");
+        File nativeDir = new File(MinecraftClient.getInstance().runDirectory, "native");
         nativeDir.mkdirs();
         File dllFile = new File(nativeDir, "MinHook.dll");
 
@@ -67,6 +91,7 @@ public class Streamproof implements ClientModInitializer {
             throw new RuntimeException("MinHook failed to initialize");
         }
 
+        Streamproof.client = MinecraftClient.getInstance();
         Streamproof.obsWrapper = new ObsWrapper();
         LOGGER.info("Streamproof loaded successfully ;3");
 

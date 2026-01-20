@@ -1,0 +1,12 @@
+{
+  "success": {
+    "sounds": [
+      "streamproof:success"
+    ]
+  },
+  "failure": {
+    "sounds": [
+      "streamproof:failure"
+    ]
+  }
+}

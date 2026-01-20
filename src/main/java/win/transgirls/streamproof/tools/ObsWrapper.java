@@ -2,14 +2,22 @@ package win.transgirls.streamproof.tools;
 
 import com.sun.jna.*;
 import com.sun.jna.platform.win32.*;
+import com.sun.jna.platform.win32.Tlhelp32.MODULEENTRY32W;
+import com.sun.jna.platform.win32.WinDef.DWORD;
+import com.sun.jna.platform.win32.WinNT.HANDLE;
 import com.sun.jna.ptr.PointerByReference;
+import net.minecraft.client.sound.PositionedSoundInstance;
+import net.minecraft.text.Text;
+import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL20;
+import org.lwjgl.opengl.GL30;
 import win.transgirls.streamproof.Streamproof;
 
-import static com.sun.jna.platform.win32.WinNT.*;
 import static com.sun.jna.platform.win32.Tlhelp32.*;
 
+import win.transgirls.streamproof.imgui.ImGuiImplementation;
 import win.transgirls.streamproof.types.Kernel32;
-import win.transgirls.streamproof.types.MinHook;
+import win.transgirls.streamproof.types.ResultToast;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -21,8 +29,9 @@ import static win.transgirls.streamproof.Streamproof.minhook;
 public class ObsWrapper {
     private static final String obsDll = "(?i)^graphics-hook(32|64)\\.dll$";
     private final long pid;
+
     public volatile boolean running = true;
-    public boolean hooked = true;
+    public boolean hooked = false;
     private ScheduledExecutorService obsDetector;
 
     public ObsWrapper() {
@@ -69,6 +78,10 @@ public class ObsWrapper {
                 Streamproof.renderSecrets.run();
             }
 
+            if (ImGuiImplementation.initialized) {
+                ImGuiImplementation.draw();
+            }
+
             return (boolean) original.invoke(Boolean.class, new Object[]{hDc});
         }, Streamproof.wglSwapBuffersObs);
 
@@ -76,9 +89,13 @@ public class ObsWrapper {
 
         if (hr == 0 && hr2 == 0) {
             hooked = true;
+            Streamproof.client.getSoundManager().play(PositionedSoundInstance.ui(Streamproof.successSound, 1.0f));
+            Streamproof.client.getToastManager().add(new ResultToast(Text.literal("OBS was successfully hooked"), true));
             Streamproof.LOGGER.info("opengl32.dll->wglSwapBuffers hooked after OBS ({}, {}, {})",
                     Streamproof.wglSwapBuffersObs.getValue(), hr, hr2);
         } else {
+            Streamproof.client.getSoundManager().play(PositionedSoundInstance.ui(Streamproof.failureSound, 1.0f));
+            Streamproof.client.getToastManager().add(new ResultToast(Text.literal("OBS failed to hook"), false));
             LOGGER.warn("opengl32.dll-wglSwapBuffers hook failed while attempting to create or enable! Create={}, Enable={}", hr, hr2);
         }
     }

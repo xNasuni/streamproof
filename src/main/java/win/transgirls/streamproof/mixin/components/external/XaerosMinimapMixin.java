@@ -14,7 +14,7 @@ import xaero.hud.render.module.ModuleRenderContext;
 public class XaerosMinimapMixin {
     @WrapMethod(method = "render(Lxaero/hud/minimap/module/MinimapSession;Lxaero/hud/render/module/ModuleRenderContext;Lnet/minecraft/class_332;F)V")
     private void wrapRender(MinimapSession session, ModuleRenderContext c, @Coerce Object guiGraphics, float partialTicks, Operation<Void> original) {
-        Streamproof.renderQueue.add((data) -> {
+        Streamproof.renderQueue.add(guiGraphics, (data) -> {
             original.call(session, c, data.graphics, partialTicks);
         });
     }
