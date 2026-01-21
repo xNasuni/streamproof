@@ -71,16 +71,28 @@ public class ObsWrapper {
         int hr = minhook.MH_CreateHook(proc, (hDc) -> {
             Function original = Function.getFunction(Streamproof.wglSwapBuffersObs.getValue(), Function.ALT_CONVENTION);
 
-            if (Streamproof.renderWorldSecrets != null) {
-                Streamproof.renderWorldSecrets.run();
+            try {
+                if (Streamproof.renderWorldSecrets != null) {
+                    Streamproof.renderWorldSecrets.run();
+                }
+            } catch (Throwable e) {
+                LOGGER.error("Failed to render world secrets", e);
             }
 
-            if (Streamproof.renderGuiSecrets != null) {
-                Streamproof.renderGuiSecrets.run();
+            try {
+                if (Streamproof.renderGuiSecrets != null) {
+                    Streamproof.renderGuiSecrets.run();
+                }
+            } catch (Throwable e) {
+                LOGGER.error("Failed to render gui secrets", e);
             }
 
-            if (ImGuiImplementation.initialized) {
-                ImGuiImplementation.draw();
+            try {
+                if (ImGuiImplementation.initialized) {
+                    ImGuiImplementation.draw();
+                }
+            } catch (Throwable e) {
+                LOGGER.error("Failed to render imgui", e);
             }
 
             return (boolean) original.invoke(Boolean.class, new Object[]{hDc});

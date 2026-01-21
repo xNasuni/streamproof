@@ -53,7 +53,7 @@ public class Dashboard extends PanelInterface {
         ImGui.begin("Streamproof Internal", ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoScrollbar);
         this.renderEffects(EffectOrder.InGui);
 
-        ImGuiHelper.addImageRounded(Style.iconTexture, 20, 20, 5);
+        ImGui.image(Style.iconTexture, 20, 20);
 
         ImGui.pushFont(Style.getFont(24));
         ImGui.sameLine();

@@ -93,47 +93,51 @@ public class GameRenderMixin {
     @Inject(method = "render", at = @At("TAIL"), remap = false)
     private void injectRender(RenderTickCounter deltaTracker, boolean bl, CallbackInfo ci) {
         if (Streamproof.obsWrapper != null && Streamproof.obsWrapper.hooked) {
-            Streamproof.renderWorldSecrets = () -> {
-                Profiler profiler = Profilers.get();
+            if (Streamproof.secretDepthTex != null) {
+                Streamproof.renderWorldSecrets = () -> {
+                    Profiler profiler = Profilers.get();
 
-                RenderSystem.setProjectionMatrix(Streamproof.lastProjectionSlice, ProjectionType.PERSPECTIVE);
+                    RenderSystem.setProjectionMatrix(Streamproof.lastProjectionSlice, ProjectionType.PERSPECTIVE);
 
-                profiler.push("streamproofWorldBufferCopy");
+                    profiler.push("streamproofWorldBufferCopy");
 
-                MatrixStack stack = new MatrixStack();
-                VertexConsumerProvider.Immediate buffers = MinecraftClient.getInstance().getBufferBuilders().getEntityVertexConsumers();
+                    MatrixStack stack = new MatrixStack();
+                    VertexConsumerProvider.Immediate buffers = MinecraftClient.getInstance().getBufferBuilders().getEntityVertexConsumers();
 
-                stack.push();
-                stack.peek().rotate(Streamproof.client.gameRenderer.getCamera().getRotation().conjugate(new Quaternionf()));
+                    stack.push();
+                    stack.peek().rotate(Streamproof.client.gameRenderer.getCamera().getRotation().conjugate(new Quaternionf()));
 
-                Framebuffer mainFbo = MinecraftClient.getInstance().getFramebuffer();
-                GpuTexture realDepth = mainFbo.depthAttachment;
+                    Framebuffer mainFbo = MinecraftClient.getInstance().getFramebuffer();
+                    GpuTexture realDepth = mainFbo.depthAttachment;
 
-                if (Streamproof.secretDepthView == null) {
-                    Streamproof.secretDepthView = RenderSystem.getDevice().createTextureView(Streamproof.secretDepthTex);
-                }
+                    if (Streamproof.secretDepthView == null) {
+                        Streamproof.secretDepthView = RenderSystem.getDevice().createTextureView(Streamproof.secretDepthTex);
+                    }
 
-                int w = Streamproof.secretDepthTex.getWidth(0);
-                int h = Streamproof.secretDepthTex.getHeight(0);
+                    int w = Streamproof.secretDepthTex.getWidth(0);
+                    int h = Streamproof.secretDepthTex.getHeight(0);
 
-                RenderSystem.getDevice().createCommandEncoder().copyTextureToTexture(
-                        Streamproof.secretDepthTex, realDepth,
-                        0, 0, 0, 0, 0, w, h
-                );
+                    if (realDepth != null && w <= realDepth.getWidth(0) && h <= realDepth.getHeight(0)) {
+                        RenderSystem.getDevice().createCommandEncoder().copyTextureToTexture(
+                                Streamproof.secretDepthTex, realDepth,
+                                0, 0, 0, 0, 0, w, h
+                        );
+                    }
 
-                profiler.pop();
+                    profiler.pop();
 
-                profiler.push("streamproofWorldRendering");
+                    profiler.push("streamproofWorldRendering");
 
-                GL.enableDepth();
-                GL.depthFunc(GL11C.GL_LEQUAL);
+                    GL.enableDepth();
+                    GL.depthFunc(GL11C.GL_LEQUAL);
 
-                Streamproof.renderQueue.releaseDeferredWorld(stack, buffers);
-                buffers.draw();
+                    Streamproof.renderQueue.releaseDeferredWorld(stack, buffers);
+                    buffers.draw();
 
-                GL.disableDepth();
-                stack.pop();
-            };
+                    GL.disableDepth();
+                    stack.pop();
+                };
+            }
 
             Streamproof.renderGuiSecrets = () -> {
                 Profiler profiler = Profilers.get();

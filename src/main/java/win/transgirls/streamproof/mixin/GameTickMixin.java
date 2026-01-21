@@ -12,5 +12,7 @@ public class GameTickMixin {
     @Inject(method = "render", at = @At("HEAD"))
     private void injectTick(boolean bl, CallbackInfo ci) {
         Streamproof.renderQueue.clear();
+        Streamproof.renderGuiSecrets = null;
+        Streamproof.renderWorldSecrets = null;
     }
 }
