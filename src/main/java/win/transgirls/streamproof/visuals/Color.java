@@ -3,6 +3,9 @@ package win.transgirls.streamproof.visuals;
 import org.joml.Math;
 
 public record Color(int r, int g, int b, int a) {
+    public static final Color PINK = new Color(255, 143, 178, 255);
+    public static final Color GRAY = new Color(182, 182, 182, 255);
+
     public static float tick = 0.0f;
 
     public static int rgba(int r, int g, int b, int a) {

@@ -7,19 +7,22 @@ import com.sun.jna.ptr.PointerByReference;
 import net.fabricmc.api.ClientModInitializer;
 
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
+import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.texture.GlTexture;
+import net.minecraft.client.util.InputUtil;
 import net.minecraft.client.util.Window;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.util.Identifier;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.joml.Matrix4f;
 import org.lwjgl.glfw.GLFW;
 import win.transgirls.streamproof.imgui.ImGuiImplementation;
 import win.transgirls.streamproof.input.KeyAction;
-import win.transgirls.streamproof.input.Keybind;
 import win.transgirls.streamproof.input.KeyboardMain;
+import win.transgirls.streamproof.input.MinecraftKeybind;
+import win.transgirls.streamproof.tools.StreamproofSettings;
 import win.transgirls.streamproof.types.MinHook;
 import win.transgirls.streamproof.tools.ObsWrapper;
 import win.transgirls.streamproof.tools.RenderQueue;
@@ -40,6 +43,8 @@ public class Streamproof implements ClientModInitializer {
             SoundEvent.of(Identifier.of("streamproof", "failure"));
 
     public static final RenderQueue renderQueue = new RenderQueue();
+    public static final StreamproofSettings settings = new StreamproofSettings();
+
     public static ObsWrapper obsWrapper;
     public static PointerByReference wglSwapBuffersObs;
     public static MinHook minhook = null;
@@ -47,19 +52,20 @@ public class Streamproof implements ClientModInitializer {
     public static Window window;
 
     public static Runnable renderGuiSecrets;
-    public static Runnable renderWorldSecrets = null;
+    public static Runnable renderWorldSecrets;
 
-    public static GpuBufferSlice lastProjectionSlice = null;
-    public static GlTexture secretDepthTex = null;
-    public static GpuTextureView secretDepthView = null;
+    public static GpuBufferSlice lastProjectionSlice;
+    public static GlTexture secretDepthTex;
+    public static GpuTextureView secretDepthView;
+
+    private static KeyBinding.Category mainCategory;
+    private static KeyBinding toggleConfig;
+    private static KeyBinding closeConfig;
 
     public static void lateInit() {
         ImGuiImplementation.create(window.getHandle());
 
         Interface.init();
-        KeyboardMain.on(new Keybind(KeyAction.PRESSING, GLFW.GLFW_KEY_RIGHT_SHIFT, () -> {
-            Interface.visible = !Interface.visible;
-        }));
     }
 
     @Override
@@ -100,12 +106,44 @@ public class Streamproof implements ClientModInitializer {
             throw new RuntimeException("MinHook failed to initialize");
         }
 
+        mainCategory = KeyBinding.Category.create(Identifier.of("streamproof", "main"));
+
+        toggleConfig = new KeyBinding(
+                "key.streamproof.config",
+                InputUtil.Type.KEYSYM,
+                GLFW.GLFW_KEY_RIGHT_SHIFT,
+                mainCategory
+        );
+
+        closeConfig = new KeyBinding(
+                "key.streamproof.close",
+                InputUtil.Type.KEYSYM,
+                GLFW.GLFW_KEY_ESCAPE,
+                mainCategory
+        );
+
+        KeyBindingHelper.registerKeyBinding(toggleConfig);
+        KeyBindingHelper.registerKeyBinding(closeConfig);
+
         Streamproof.client = MinecraftClient.getInstance();
         Streamproof.obsWrapper = new ObsWrapper();
         LOGGER.info("Streamproof loaded successfully ;3");
 
-        ClientLifecycleEvents.CLIENT_STOPPING.register((minecraft) -> {
+        KeyboardMain.on(new MinecraftKeybind(toggleConfig, (action) -> {
+            if (action == KeyAction.PRESSING) {
+                Interface.visible = !Interface.visible;
+            }
+        }));
+
+        KeyboardMain.on(new MinecraftKeybind(closeConfig, (action) -> {
+            if (action == KeyAction.PRESSING) {
+                Interface.visible = false;
+            }
+        }));
+
+        ClientLifecycleEvents.CLIENT_STOPPING.register(client -> {
             Streamproof.obsWrapper.stop();
+            Streamproof.settings.stop();
         });
     }
 }

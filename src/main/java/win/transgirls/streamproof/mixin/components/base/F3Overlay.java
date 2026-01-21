@@ -9,12 +9,13 @@ import java.util.List;
 
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.hud.DebugHud;
+import win.transgirls.streamproof.tools.ComponentKind;
 
 @Mixin(DebugHud.class)
-public class DebugOverlay {
+public class F3Overlay {
     @WrapMethod(method = "drawText")
-    private void wrapRender(DrawContext guiGraphics, List<String> list, boolean bl, Operation<Void> original) {
-        Streamproof.renderQueue.deferGui(guiGraphics, (data) -> {
+    private void wrapRender(DrawContext graphics, List<String> list, boolean bl, Operation<Void> original) {
+        Streamproof.renderQueue.deferGui(Streamproof.settings.isStreamproof(ComponentKind.F3_OVERLAY), graphics, (data) -> {
             original.call(data.graphics, list, bl);
         });
     }

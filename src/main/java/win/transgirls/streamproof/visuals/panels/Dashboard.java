@@ -4,20 +4,37 @@ package win.transgirls.streamproof.visuals.panels;
 import imgui.*;
 import imgui.flag.ImGuiCol;
 import imgui.flag.ImGuiCond;
+import imgui.flag.ImGuiStyleVar;
 import imgui.flag.ImGuiWindowFlags;
 import net.minecraft.SharedConstants;
 import win.transgirls.streamproof.Streamproof;
-import win.transgirls.streamproof.systems.gl.ImGuiHelper;
+import win.transgirls.streamproof.tools.ComponentCategory;
+import win.transgirls.streamproof.tools.ComponentKind;
+import win.transgirls.streamproof.visuals.Color;
 import win.transgirls.streamproof.visuals.Style;
 import win.transgirls.streamproof.visuals.candy.EffectOrder;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import static win.transgirls.streamproof.Streamproof.LOGGER;
 import static win.transgirls.streamproof.visuals.Color.rgba;
 
 public class Dashboard extends PanelInterface {
     private final List<Tab> tabs = new ArrayList<>();
+
+    public static void graySeperator() {
+        ImGui.dummy(0, 1);
+
+        ImVec2 start = ImGui.getCursorScreenPos();
+        ImVec2 end = new ImVec2(start.x + ImGui.getContentRegionAvailX(), start.y + 1);
+
+        ImDrawList drawList = ImGui.getWindowDrawList();
+        drawList.addRectFilled(start.x, start.y, end.x, end.y, rgba(196, 196, 196, 85));
+
+        ImGui.dummy(0, 0);
+    }
 
     @Override
     public PanelType getType() {
@@ -27,16 +44,8 @@ public class Dashboard extends PanelInterface {
     @Override
     public void setup() {
         this.tabs.addAll(List.of(new Tab[]{
-                new Tab("Main", () -> {
-                    ImGui.text("main tab!!");
-                    ImGui.text(String.format("FPS: %.2f", ImGui.getIO().getFramerate()));
-                }, true),
-                new Tab("Misc", () -> {
-                    ImGui.text("second");
-                }),
-                new Tab("Options", () -> {
-                    ImGui.textColored(rgba(182, 182, 182, 255), "Offline");
-                })
+                new Tab("Toggles", this::renderToggles, true),
+                new Tab("Extra", this::renderExtras, false)
         }));
 
         super.setup();
@@ -53,32 +62,39 @@ public class Dashboard extends PanelInterface {
         ImGui.begin("Streamproof Internal", ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoScrollbar);
         this.renderEffects(EffectOrder.InGui);
 
-        ImGui.image(Style.iconTexture, 20, 20);
+        ImGui.dummy(-8f, 0f);
+        ImGui.sameLine();
+        ImGui.image(Style.iconTexture, 32, 32);
 
-        ImGui.pushFont(Style.getFont(24));
+        ImGui.pushFont(Style.getFont(32));
         ImGui.sameLine();
 
-        ImGui.textColored(rgba(255, 168, 240, 255), "Streamproof");
-        ImGui.sameLine();
-        ImGui.textColored(rgba(182, 182, 182, 255), String.format("%s <3", SharedConstants.getGameVersion().id()));
-
-        ImGuiHelper.graySeperator();
-
+        ImGui.beginGroup();
+        ImGui.textColored(Color.PINK.toInt(), "Streamproof");
         ImGui.popFont();
         ImGui.pushFont(Style.getFont(16));
+        ImGui.setCursorPosY(ImGui.getCursorPosY() - 4f);
+        ImGui.textColored(Color.GRAY.toInt(), String.format("%s <3", SharedConstants.getGameVersion().id()));
+        ImGui.popFont();
+        ImGui.endGroup();
+
+        ImGui.setCursorPosY(ImGui.getCursorPosY() - 4f);
+        graySeperator();
+
+        ImGui.pushFont(Style.getFont(18));
 
         for (Tab tab : this.tabs) {
-            boolean isItPink = tab.visible();
+            boolean selected = tab.visible();
             ImGui.pushStyleColor(ImGuiCol.Button, rgba(0, 0, 0, 0));
             ImGui.pushStyleColor(ImGuiCol.ButtonHovered, rgba(0, 0, 0, 0));
             ImGui.pushStyleColor(ImGuiCol.ButtonActive, rgba(0, 0, 0, 0));
-            if (isItPink) {
-                ImGui.pushStyleColor(ImGuiCol.Text, rgba(255, 168, 240, 255));
+            if (!selected) {
+                ImGui.pushStyleColor(ImGuiCol.Text, Color.GRAY.toInt());
             }
             if (ImGui.button(tab.label)) {
                 tab.show();
             }
-            if (isItPink) {
+            if (!selected) {
                 ImGui.popStyleColor();
             }
             ImGui.popStyleColor();
@@ -98,6 +114,70 @@ public class Dashboard extends PanelInterface {
         ImGui.end();
 
         this.renderEffects(EffectOrder.AfterGui);
+    }
+
+    public void renderToggles() {
+        for (ComponentCategory category : Streamproof.settings.getCategories()) {
+            ImVec2 categorySize = new ImVec2();
+            ImGui.calcTextSize(categorySize, category.label);
+
+            float maxWidth = categorySize.x;
+            for (ComponentKind kind : Streamproof.settings.getKinds()) {
+                if (Streamproof.settings.getCategoryForKind(kind).equals(category)) {
+                    ImVec2 labelSize = new ImVec2();
+                    ImGui.calcTextSize(labelSize, kind.label);
+
+                    float textWidth = labelSize.x;
+                    maxWidth = Math.max(maxWidth, textWidth);
+                }
+            }
+
+            float childWidth = maxWidth + 40;
+            boolean transparent = category.equals(ComponentCategory.NOT_FOUND);
+
+            if (transparent) {
+                ImGui.pushStyleVar(ImGuiStyleVar.Alpha, 0.5f);
+            }
+
+            if (ImGui.beginChild(category.label, childWidth, 0)) {
+                ImGui.text(category.label);
+                ImGui.separator();
+
+                for (ComponentKind kind : Streamproof.settings.getKinds()) {
+                    if (Streamproof.settings.getCategoryForKind(kind).equals(category)) {
+                        boolean enabled = Streamproof.settings.isStreamproof(kind);
+                        if (ImGui.checkbox(kind.label, enabled)) {
+                            try {
+                                Streamproof.settings.setStreamproof(kind, !enabled);
+                            } catch (IOException e) {
+                                LOGGER.error("Failed to save setting", e);
+                            }
+                        }
+                    }
+                }
+            }
+
+            ImGui.endChild();
+
+            if (transparent) {
+                ImGui.popStyleVar();
+            }
+
+            ImGui.sameLine();
+        }
+    }
+
+    public void renderExtras() {
+        ComponentKind kind = ComponentKind.STREAMPROOF_IMGUI_WINDOW;
+
+        boolean enabled = Streamproof.settings.isStreamproof(kind);
+        if (ImGui.checkbox(kind.label, enabled)) {
+            try {
+                Streamproof.settings.setStreamproof(kind, !enabled);
+            } catch (IOException e) {
+                LOGGER.error("Failed to save setting", e);
+            }
+        }
     }
 
     public static class Tab {

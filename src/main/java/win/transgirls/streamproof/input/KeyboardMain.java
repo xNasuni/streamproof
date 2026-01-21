@@ -1,29 +1,31 @@
 package win.transgirls.streamproof.input;
 
 
+import net.minecraft.client.option.KeyBinding;
+
 import java.util.ArrayList;
 
 public class KeyboardMain {
     public static boolean passKeyboardInput = true;
-    protected static ArrayList<Keybind> listeners = new ArrayList<>();
+    protected static ArrayList<MinecraftKeybind> listeners = new ArrayList<>();
 
     public static void keyDown(int key) {
-        for (Keybind listener : listeners) {
-            if (listener.is(key)) {
-                listener.press();
+        for (MinecraftKeybind keybind : listeners) {
+            if (keybind.is(key)) {
+                keybind.press();
             }
         }
     }
 
     public static void keyUp(int key) {
-        for (Keybind listener : listeners) {
-            if (listener.is(key)) {
-                listener.release();
+        for (MinecraftKeybind keybind : listeners) {
+            if (keybind.is(key)) {
+                keybind.release();
             }
         }
     }
 
-    public static void on(Keybind keybind) {
+    public static void on(MinecraftKeybind keybind) {
         listeners.add(keybind);
     }
 }

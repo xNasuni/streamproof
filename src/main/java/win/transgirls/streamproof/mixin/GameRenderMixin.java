@@ -33,6 +33,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import win.transgirls.streamproof.Streamproof;
+import win.transgirls.streamproof.imgui.ImGuiImplementation;
 import win.transgirls.streamproof.systems.gl.GL;
 import win.transgirls.streamproof.types.WorldRenderData;
 
@@ -151,6 +152,7 @@ public class GameRenderMixin {
                 profiler.push("streamproofGuiRendering");
 
                 DrawContext graphics = new DrawContext(this.client, this.guiState, i, j);
+                GL.disableDepth();
 
                 this.guiState.clear();
                 Streamproof.renderQueue.releaseDeferredGui(graphics);

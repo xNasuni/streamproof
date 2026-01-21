@@ -145,7 +145,6 @@ public class Shader {
 
     public void setDefaults() {
         set("uResolution", Streamproof.window.getFramebufferWidth(), Streamproof.window.getFramebufferHeight());
-        set("uTime", (float) (System.currentTimeMillis() % 100000) / 1000f);
     }
 
     public void destroy() {

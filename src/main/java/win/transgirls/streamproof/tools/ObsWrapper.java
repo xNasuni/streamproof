@@ -6,6 +6,9 @@ import com.sun.jna.platform.win32.Tlhelp32.MODULEENTRY32W;
 import com.sun.jna.platform.win32.WinDef.DWORD;
 import com.sun.jna.platform.win32.WinNT.HANDLE;
 import com.sun.jna.ptr.PointerByReference;
+import net.minecraft.client.gui.screen.ChatScreen;
+import net.minecraft.client.gui.screen.GameModeSwitcherScreen;
+import net.minecraft.client.gui.screen.SleepingChatScreen;
 import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.text.Text;
 import win.transgirls.streamproof.Streamproof;
@@ -71,20 +74,22 @@ public class ObsWrapper {
         int hr = minhook.MH_CreateHook(proc, (hDc) -> {
             Function original = Function.getFunction(Streamproof.wglSwapBuffersObs.getValue(), Function.ALT_CONVENTION);
 
-            try {
-                if (Streamproof.renderWorldSecrets != null) {
-                    Streamproof.renderWorldSecrets.run();
+            if (Streamproof.client.currentScreen == null || Streamproof.client.currentScreen instanceof ChatScreen || Streamproof.client.currentScreen instanceof GameModeSwitcherScreen) {
+                try {
+                    if (Streamproof.renderWorldSecrets != null) {
+                        Streamproof.renderWorldSecrets.run();
+                    }
+                } catch (Throwable e) {
+                    LOGGER.error("Streamproof failed to render world secrets", e);
                 }
-            } catch (Throwable e) {
-                LOGGER.error("Failed to render world secrets", e);
-            }
 
-            try {
-                if (Streamproof.renderGuiSecrets != null) {
-                    Streamproof.renderGuiSecrets.run();
+                try {
+                    if (Streamproof.renderGuiSecrets != null) {
+                        Streamproof.renderGuiSecrets.run();
+                    }
+                } catch (Throwable e) {
+                    LOGGER.error("Streamproof failed to render gui secrets", e);
                 }
-            } catch (Throwable e) {
-                LOGGER.error("Failed to render gui secrets", e);
             }
 
             try {
@@ -92,7 +97,7 @@ public class ObsWrapper {
                     ImGuiImplementation.draw();
                 }
             } catch (Throwable e) {
-                LOGGER.error("Failed to render imgui", e);
+                LOGGER.error("Streamproof failed to render imgui", e);
             }
 
             return (boolean) original.invoke(Boolean.class, new Object[]{hDc});

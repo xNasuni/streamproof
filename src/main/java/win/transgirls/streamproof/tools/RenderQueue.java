@@ -4,6 +4,8 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.textures.GpuTexture;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gl.Framebuffer;
+import net.minecraft.client.gui.screen.ChatScreen;
+import net.minecraft.client.gui.screen.GameModeSwitcherScreen;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.util.math.MatrixStack;
 import org.joml.Quaternionf;
@@ -23,24 +25,28 @@ public class RenderQueue {
     private final ArrayList<Consumer<GuiRenderData>> guiRenderQueue = new ArrayList<>();
     private final ArrayList<Consumer<WorldRenderData>> worldRenderQueue = new ArrayList<>();
 
-    public void deferGui(Object fallbackGraphics, Consumer<GuiRenderData> consumer) {
-        if (Streamproof.obsWrapper != null && Streamproof.obsWrapper.hooked) {
-            guiRenderQueue.add(consumer);
+    public void deferGui(boolean deferMe, Object fallbackGraphics, Consumer<GuiRenderData> consumer) {
+        if (Streamproof.obsWrapper != null && Streamproof.obsWrapper.hooked && deferMe) {
+            if (Streamproof.client.currentScreen == null || Streamproof.client.currentScreen instanceof ChatScreen || Streamproof.client.currentScreen instanceof GameModeSwitcherScreen) {
+                guiRenderQueue.add(consumer);
+            }
         } else {
             consumer.accept(GuiRenderData.with(fallbackGraphics));
         }
     }
 
-    public void deferWorld(MatrixStack fallbackMatrix, VertexConsumerProvider fallbackBuffers, Consumer<WorldRenderData> consumer) {
-        if (Streamproof.obsWrapper != null && Streamproof.obsWrapper.hooked) {
-            worldRenderQueue.add(consumer);
+    public void deferWorld(boolean deferMe, MatrixStack fallbackMatrix, VertexConsumerProvider fallbackBuffers, Consumer<WorldRenderData> consumer) {
+        if (Streamproof.obsWrapper != null && Streamproof.obsWrapper.hooked && deferMe) {
+            if ((Streamproof.client.currentScreen == null || Streamproof.client.currentScreen instanceof ChatScreen || Streamproof.client.currentScreen instanceof GameModeSwitcherScreen)) {
+                worldRenderQueue.add(consumer);
+            }
         } else {
             consumer.accept(WorldRenderData.with(fallbackMatrix, fallbackBuffers));
         }
     }
 
-    public void releaseDeferredGui(DrawContext g) {
-        GuiRenderData data = GuiRenderData.with(g);
+    public void releaseDeferredGui(DrawContext graphics) {
+        GuiRenderData data = GuiRenderData.with(graphics);
 
         guiRenderQueue.forEach((consumer) -> {
             consumer.accept(data);
@@ -51,7 +57,7 @@ public class RenderQueue {
 
     public void releaseDeferredWorld(MatrixStack stack, VertexConsumerProvider buffers) {
         WorldRenderData data = WorldRenderData.with(stack, buffers);
-        
+
         worldRenderQueue.forEach((consumer) -> {
             consumer.accept(data);
         });

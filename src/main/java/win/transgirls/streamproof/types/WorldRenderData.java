@@ -10,8 +10,11 @@ public class WorldRenderData {
 
     public static WorldRenderData with(Object fallbackMatrix, Object fallbackBuffers) {
         WorldRenderData data = new WorldRenderData();
-        data.stack = (MatrixStack) fallbackMatrix;
-        data.buffers = (VertexConsumerProvider) fallbackBuffers;
+        try {
+            data.stack = (MatrixStack) fallbackMatrix;
+            data.buffers = (VertexConsumerProvider) fallbackBuffers;
+        } catch (Throwable ignored) {
+        }
 
         return data;
     }

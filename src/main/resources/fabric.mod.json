@@ -13,11 +13,14 @@
   },
   "license": "MIT",
   "icon": "assets/streamproof/icon.png",
-  "environment": "*",
+  "environment": "client",
   "accessWidener": "streamproof.aw",
   "entrypoints": {
     "client": [
       "win.transgirls.streamproof.Streamproof"
+    ],
+    "modmenu": [
+      "win.transgirls.streamproof.ModMenuImpl"
     ]
   },
   "mixins": [
@@ -31,7 +34,5 @@
     "minecraft": "*",
     "java": ">=17",
     "fabric-api": "*"
-  },
-  "suggests": {
   }
 }

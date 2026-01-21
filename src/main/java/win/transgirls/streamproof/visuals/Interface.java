@@ -25,7 +25,6 @@ public class Interface {
     private static void renderPanels(PanelType type) {
         for (PanelInterface panel : panels) {
             if (panel.visible() && panel.getType() == type) {
-                LOGGER.debug("Rendering panel: {} (type: {})", panel.getClass().getSimpleName(), type);
                 panel.render(ImGui.getIO());
             }
         }

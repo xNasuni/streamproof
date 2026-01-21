@@ -8,7 +8,10 @@ public class GuiRenderData {
 
     public static GuiRenderData with(Object graphics) {
         GuiRenderData data = new GuiRenderData();
-        data.graphics = (DrawContext) graphics;
+        try {
+            data.graphics = (DrawContext) graphics;
+        } catch (Throwable ignored) {
+        }
 
         return data;
     }

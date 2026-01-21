@@ -91,13 +91,13 @@ public class Style {
                 }
             }
         } catch (Throwable e) {
-            LOGGER.error("Couldn't load font, using fallback.", e);
+            LOGGER.error("Streamproof failed to load font, using fallback.", e);
         }
 
         try {
             iconTexture = Style.loadTexture("icon.png");
         } catch (Throwable e) {
-            LOGGER.error("Couldn't load icon texture, default to none.", e);
+            LOGGER.error("Streamproof failed to load icon texture, default to none.", e);
         }
     }
 
@@ -111,7 +111,7 @@ public class Style {
 
         try (InputStream stream = Streamproof.class.getResourceAsStream(String.format("/assets/streamproof/%s", path))) {
             if (stream == null) {
-                throw new RuntimeException(String.format("Couldn't find file: %s", path));
+                throw new RuntimeException(String.format("Streamproof failed to find file: %s", path));
             }
 
             byte[] imageData = stream.readAllBytes();
@@ -151,7 +151,7 @@ public class Style {
             MemoryUtil.memFree(heightBuffer);
             MemoryUtil.memFree(channelsBuffer);
         } catch (Throwable e) {
-            LOGGER.error("Failed to load texture from path {}: {}", path, e);
+            LOGGER.error("Streamproof failed to load texture from path {}: {}", path, e);
             textureId = -1;
         }
 
