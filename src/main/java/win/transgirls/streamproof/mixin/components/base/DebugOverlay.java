@@ -14,7 +14,7 @@ import net.minecraft.client.gui.hud.DebugHud;
 public class DebugOverlay {
     @WrapMethod(method = "drawText")
     private void wrapRender(DrawContext guiGraphics, List<String> list, boolean bl, Operation<Void> original) {
-        Streamproof.renderQueue.add(guiGraphics, (data) -> {
+        Streamproof.renderQueue.deferGui(guiGraphics, (data) -> {
             original.call(data.graphics, list, bl);
         });
     }

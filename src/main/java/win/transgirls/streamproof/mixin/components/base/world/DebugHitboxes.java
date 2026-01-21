@@ -1,4 +1,4 @@
-package win.transgirls.streamproof.mixin.components.base;
+package win.transgirls.streamproof.mixin.components.base.world;
 
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
@@ -13,10 +13,9 @@ import win.transgirls.streamproof.Streamproof;
 @Mixin(GizmoDrawerImpl.class)
 public class DebugHitboxes {
     @WrapMethod(method = "draw")
-    private void wrapRender(MatrixStack poseStack, VertexConsumerProvider multiBufferSource, CameraRenderState cameraRenderState, Matrix4f matrix4f, Operation<Void> original) {
-//        Streamproof.renderQueue.add((data) -> {
-//            original.call(poseStack, data.buffer, cameraRenderState, matrix4f);
-//        });
-        original.call(poseStack, multiBufferSource, cameraRenderState, matrix4f);
+    private void wrapGizmoDraw(MatrixStack matrices, VertexConsumerProvider vertexConsumers, CameraRenderState cameraRenderState, Matrix4f posMatrix, Operation<Void> original) throws CloneNotSupportedException {
+        Streamproof.renderQueue.deferWorld(matrices, vertexConsumers, (data) -> {
+            original.call(data.stack, data.buffers, cameraRenderState, posMatrix);
+        });
     }
 }

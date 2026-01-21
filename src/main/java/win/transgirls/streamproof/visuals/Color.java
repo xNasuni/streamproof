@@ -2,20 +2,8 @@ package win.transgirls.streamproof.visuals;
 
 import org.joml.Math;
 
-public class Color {
+public record Color(int r, int g, int b, int a) {
     public static float tick = 0.0f;
-
-    public final int r;
-    public final int g;
-    public final int b;
-    public final int a;
-
-    public Color(int r, int g, int b, int a) {
-        this.r = r;
-        this.g = g;
-        this.b = b;
-        this.a = a;
-    }
 
     public static int rgba(int r, int g, int b, int a) {
         return (a << 24) | (b << 16) | (g << 8) | r;

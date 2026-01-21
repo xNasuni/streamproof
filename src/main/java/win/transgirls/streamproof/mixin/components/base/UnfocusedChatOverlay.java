@@ -16,7 +16,7 @@ import win.transgirls.streamproof.Streamproof;
 public abstract class UnfocusedChatOverlay {
     @WrapMethod(method = "render(Lnet/minecraft/client/gui/DrawContext;Lnet/minecraft/client/font/TextRenderer;IIIZZ)V")
     private void wrapRender(DrawContext guiGraphics, TextRenderer font, int i, int j, int k, boolean bl, boolean bl2, Operation<Void> original) {
-        Streamproof.renderQueue.add(guiGraphics, (data) -> {
+        Streamproof.renderQueue.deferGui(guiGraphics, (data) -> {
             original.call(data.graphics, font, i, j, k, bl, bl2);
         });
     }

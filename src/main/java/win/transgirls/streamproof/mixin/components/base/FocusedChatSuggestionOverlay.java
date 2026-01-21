@@ -11,7 +11,7 @@ import win.transgirls.streamproof.Streamproof;
 public class FocusedChatSuggestionOverlay {
     @WrapMethod(method = "render")
     private void wrapRender(DrawContext guiGraphics, int i, int j, Operation<Void> original) {
-        Streamproof.renderQueue.add(guiGraphics, (data) -> {
+        Streamproof.renderQueue.deferGui(guiGraphics, (data) -> {
             original.call(data.graphics, i, j);
         });
     }

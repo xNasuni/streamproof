@@ -1,17 +1,20 @@
 package win.transgirls.streamproof;
 
+import com.mojang.blaze3d.buffers.GpuBufferSlice;
+import com.mojang.blaze3d.textures.GpuTextureView;
 import com.sun.jna.Native;
-import com.sun.jna.Pointer;
 import com.sun.jna.ptr.PointerByReference;
 import net.fabricmc.api.ClientModInitializer;
 
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.texture.GlTexture;
 import net.minecraft.client.util.Window;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.util.Identifier;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.joml.Matrix4f;
 import org.lwjgl.glfw.GLFW;
 import win.transgirls.streamproof.imgui.ImGuiImplementation;
 import win.transgirls.streamproof.input.KeyAction;
@@ -40,9 +43,15 @@ public class Streamproof implements ClientModInitializer {
     public static ObsWrapper obsWrapper;
     public static PointerByReference wglSwapBuffersObs;
     public static MinHook minhook = null;
-    public static Runnable renderSecrets;
     public static MinecraftClient client;
     public static Window window;
+
+    public static Runnable renderGuiSecrets;
+    public static Runnable renderWorldSecrets = null;
+
+    public static GpuBufferSlice lastProjectionSlice = null;
+    public static GlTexture secretDepthTex = null;
+    public static GpuTextureView secretDepthView = null;
 
     public static void lateInit() {
         ImGuiImplementation.create(window.getHandle());
@@ -86,7 +95,7 @@ public class Streamproof implements ClientModInitializer {
         MinHook minhook = Native.load("MinHook", MinHook.class);
         Streamproof.minhook = minhook;
 
-        Streamproof.LOGGER.info("MinHook.{}.dll loaded", arch64 ? "x64" : "x86");
+        LOGGER.info("MinHook.{}.dll loaded", arch64 ? "x64" : "x86");
         if (minhook.MH_Initialize() != 0) {
             throw new RuntimeException("MinHook failed to initialize");
         }

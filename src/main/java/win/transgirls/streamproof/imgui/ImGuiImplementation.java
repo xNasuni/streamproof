@@ -7,10 +7,9 @@ import imgui.gl3.ImGuiImplGl3;
 import imgui.glfw.ImGuiImplGlfw;
 import org.joml.Math;
 import org.lwjgl.glfw.GLFW;
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL13;
-import org.lwjgl.opengl.GL33;
+import org.lwjgl.opengl.*;
 import win.transgirls.streamproof.Streamproof;
+import win.transgirls.streamproof.systems.gl.GL;
 import win.transgirls.streamproof.visuals.Color;
 import win.transgirls.streamproof.visuals.Interface;
 import win.transgirls.streamproof.visuals.Style;
@@ -32,10 +31,7 @@ public class ImGuiImplementation {
 
         glfw.init(handle, true);
 
-        GL11.glPixelStorei(GL11.GL_UNPACK_ROW_LENGTH, 0);
-        GL11.glPixelStorei(GL11.GL_UNPACK_ALIGNMENT, 1);
-        GL11.glPixelStorei(GL11.GL_UNPACK_SKIP_PIXELS, 0);
-        GL11.glPixelStorei(GL11.GL_UNPACK_SKIP_ROWS, 0);
+        GL.setDefaultPixelStore();
 
         gl3.init("#version 330");
 
@@ -59,52 +55,26 @@ public class ImGuiImplementation {
 
         ImGui.render();
 
-        boolean lastBlend = GL11.glIsEnabled(GL11.GL_BLEND);
-        boolean lastCullFace = GL11.glIsEnabled(GL11.GL_CULL_FACE);
-        boolean lastDepthTest = GL11.glIsEnabled(GL11.GL_DEPTH_TEST);
-        boolean lastScissorTest = GL11.glIsEnabled(GL11.GL_SCISSOR_TEST);
+        GL.saveRenderFlags();
+        GL.saveTextureState();
+        GL.savePixelStore();
 
-        int lastActiveTexture = GL11.glGetInteger(GL13.GL_ACTIVE_TEXTURE);
-        GL13.glActiveTexture(GL13.GL_TEXTURE0);
-        int lastSampler = GL11.glGetInteger(GL33.GL_SAMPLER_BINDING);
-        int lastTexture = GL11.glGetInteger(GL11.GL_TEXTURE_BINDING_2D);
+        GL.activeTexture(GL13C.GL_TEXTURE0);
 
-        int lastUnpackRowLen = GL11.glGetInteger(GL11.GL_UNPACK_ROW_LENGTH);
-        int lastUnpackAlignment = GL11.glGetInteger(GL11.GL_UNPACK_ALIGNMENT);
-        int lastUnpackSkipPixels = GL11.glGetInteger(GL11.GL_UNPACK_SKIP_PIXELS);
-        int lastUnpackSkipRows = GL11.glGetInteger(GL11.GL_UNPACK_SKIP_ROWS);
+        GL.bindSampler(0, 0);
+        GL.enable(GL11C.GL_BLEND);
+        GL.blendFunc(GL11C.GL_SRC_ALPHA, GL11C.GL_ONE_MINUS_SRC_ALPHA);
+        GL.disable(GL11C.GL_CULL_FACE);
+        GL.disable(GL11C.GL_DEPTH_TEST);
+        GL.disable(GL11C.GL_SCISSOR_TEST);
 
-        GL33.glBindSampler(0, 0);
-        GL11.glEnable(GL11.GL_BLEND);
-        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-        GL11.glDisable(GL11.GL_CULL_FACE);
-        GL11.glDisable(GL11.GL_DEPTH_TEST);
-        GL11.glDisable(GL11.GL_SCISSOR_TEST);
-
-        GL11.glPixelStorei(GL11.GL_UNPACK_ROW_LENGTH, 0);
-        GL11.glPixelStorei(GL11.GL_UNPACK_ALIGNMENT, 1);
-        GL11.glPixelStorei(GL11.GL_UNPACK_SKIP_PIXELS, 0);
-        GL11.glPixelStorei(GL11.GL_UNPACK_SKIP_ROWS, 0);
+        GL.setDefaultPixelStore();
 
         gl3.renderDrawData(ImGui.getDrawData());
 
-        GL11.glPixelStorei(GL11.GL_UNPACK_ROW_LENGTH, lastUnpackRowLen);
-        GL11.glPixelStorei(GL11.GL_UNPACK_ALIGNMENT, lastUnpackAlignment);
-        GL11.glPixelStorei(GL11.GL_UNPACK_SKIP_PIXELS, lastUnpackSkipPixels);
-        GL11.glPixelStorei(GL11.GL_UNPACK_SKIP_ROWS, lastUnpackSkipRows);
-
-        GL33.glBindSampler(0, lastSampler);
-        GL11.glBindTexture(GL11.GL_TEXTURE_2D, lastTexture);
-        GL13.glActiveTexture(lastActiveTexture);
-
-        if (lastBlend) GL11.glEnable(GL11.GL_BLEND);
-        else GL11.glDisable(GL11.GL_BLEND);
-        if (lastCullFace) GL11.glEnable(GL11.GL_CULL_FACE);
-        else GL11.glDisable(GL11.GL_CULL_FACE);
-        if (lastDepthTest) GL11.glEnable(GL11.GL_DEPTH_TEST);
-        else GL11.glDisable(GL11.GL_DEPTH_TEST);
-        if (lastScissorTest) GL11.glEnable(GL11.GL_SCISSOR_TEST);
-        else GL11.glDisable(GL11.GL_SCISSOR_TEST);
+        GL.restorePixelStore();
+        GL.restoreTextureState();
+        GL.restoreRenderFlags();
 
         if (ImGui.getIO().hasConfigFlags(ImGuiConfigFlags.ViewportsEnable)) {
             final long pointer = GLFW.glfwGetCurrentContext();

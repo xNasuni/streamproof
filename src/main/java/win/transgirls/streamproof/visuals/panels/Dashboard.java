@@ -26,7 +26,6 @@ public class Dashboard extends PanelInterface {
 
     @Override
     public void setup() {
-//        this.effects.add(new GlowEffect());
         this.tabs.addAll(List.of(new Tab[]{
                 new Tab("Main", () -> {
                     ImGui.text("main tab!!");
@@ -48,8 +47,6 @@ public class Dashboard extends PanelInterface {
     public void render(ImGuiIO io) {
         this.renderEffects(EffectOrder.BeforeOverlay);
         this.renderEffects(EffectOrder.BeforeGui);
-
-//        ImGui.showStyleEditor();
 
         ImGui.setNextWindowPos(io.getDisplaySizeX() / 2.0f, io.getDisplaySizeY() / 2.0f, ImGuiCond.Once);
 

@@ -15,7 +15,7 @@
     "GameInputMixin",
     "GameRenderMixin",
     "GameTickMixin",
-    "components.base.DebugHitboxes",
+    "components.base.world.DebugHitboxes",
     "components.base.DebugOverlay",
     "components.base.FocusedChatEditOverlay",
     "components.base.FocusedChatSuggestionOverlay",

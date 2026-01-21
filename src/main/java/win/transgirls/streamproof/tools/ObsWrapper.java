@@ -8,9 +8,6 @@ import com.sun.jna.platform.win32.WinNT.HANDLE;
 import com.sun.jna.ptr.PointerByReference;
 import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.text.Text;
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL20;
-import org.lwjgl.opengl.GL30;
 import win.transgirls.streamproof.Streamproof;
 
 import static com.sun.jna.platform.win32.Tlhelp32.*;
@@ -74,8 +71,12 @@ public class ObsWrapper {
         int hr = minhook.MH_CreateHook(proc, (hDc) -> {
             Function original = Function.getFunction(Streamproof.wglSwapBuffersObs.getValue(), Function.ALT_CONVENTION);
 
-            if (Streamproof.renderSecrets != null) {
-                Streamproof.renderSecrets.run();
+            if (Streamproof.renderWorldSecrets != null) {
+                Streamproof.renderWorldSecrets.run();
+            }
+
+            if (Streamproof.renderGuiSecrets != null) {
+                Streamproof.renderGuiSecrets.run();
             }
 
             if (ImGuiImplementation.initialized) {
@@ -91,7 +92,7 @@ public class ObsWrapper {
             hooked = true;
             Streamproof.client.getSoundManager().play(PositionedSoundInstance.ui(Streamproof.successSound, 1.0f));
             Streamproof.client.getToastManager().add(new ResultToast(Text.literal("OBS was successfully hooked"), true));
-            Streamproof.LOGGER.info("opengl32.dll->wglSwapBuffers hooked after OBS ({}, {}, {})",
+            LOGGER.info("opengl32.dll->wglSwapBuffers hooked after OBS ({}, {}, {})",
                     Streamproof.wglSwapBuffersObs.getValue(), hr, hr2);
         } else {
             Streamproof.client.getSoundManager().play(PositionedSoundInstance.ui(Streamproof.failureSound, 1.0f));

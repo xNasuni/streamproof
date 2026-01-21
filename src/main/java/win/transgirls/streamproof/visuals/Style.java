@@ -1,6 +1,7 @@
 package win.transgirls.streamproof.visuals;
 
 
+import com.mojang.blaze3d.opengl.GlStateManager;
 import imgui.*;
 import imgui.flag.ImGuiCol;
 import org.lwjgl.BufferUtils;
@@ -8,6 +9,7 @@ import org.lwjgl.opengl.*;
 import org.lwjgl.stb.STBImage;
 import org.lwjgl.system.MemoryUtil;
 import win.transgirls.streamproof.Streamproof;
+import win.transgirls.streamproof.systems.gl.GL;
 import win.transgirls.streamproof.systems.gl.Shader;
 
 import java.io.IOException;
@@ -135,27 +137,19 @@ public class Style {
             width = widthBuffer.get(0);
             height = heightBuffer.get(0);
 
-            textureId = GL11.glGenTextures();
-            GL11.glBindTexture(GL11.GL_TEXTURE_2D, textureId);
+            textureId = GL.genTexture();
 
-            GL11.glPixelStorei(GL11.GL_UNPACK_ROW_LENGTH, 0);
-            GL11.glPixelStorei(GL11.GL_UNPACK_ALIGNMENT, 1);
-            GL11.glPixelStorei(GL11.GL_UNPACK_SKIP_PIXELS, 0);
-            GL11.glPixelStorei(GL11.GL_UNPACK_SKIP_ROWS, 0);
+            GL.bindTexture(textureId);
+            GL.setDefaultPixelStore();
+            GL.setDefaultTextureParameters();
 
-            GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR);
-            GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
-            GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL12.GL_CLAMP_TO_EDGE);
-            GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL12.GL_CLAMP_TO_EDGE);
-
-            GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA, width, height, 0, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, imageBuffer);
+            GL.uploadTexture2D(GL11C.GL_TEXTURE_2D, 0, GL11C.GL_RGBA, width, height, 0, GL11C.GL_RGBA, GL11C.GL_UNSIGNED_BYTE, imageBuffer);
 
             STBImage.stbi_image_free(imageBuffer);
             MemoryUtil.memFree(nativeBuffer);
             MemoryUtil.memFree(widthBuffer);
             MemoryUtil.memFree(heightBuffer);
             MemoryUtil.memFree(channelsBuffer);
-
         } catch (Throwable e) {
             LOGGER.error("Failed to load texture from path {}: {}", path, e);
             textureId = -1;

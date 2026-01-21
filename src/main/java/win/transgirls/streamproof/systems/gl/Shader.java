@@ -5,6 +5,7 @@ import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import org.apache.commons.io.IOUtils;
 import org.lwjgl.BufferUtils;
 import win.transgirls.streamproof.Streamproof;
+import win.transgirls.streamproof.visuals.Color;
 
 import java.nio.FloatBuffer;
 import java.nio.charset.StandardCharsets;
@@ -67,13 +68,13 @@ public class Shader {
 
         if (cachedVao == -1) {
             float[] vertices = {
-                    -1.0f, -1.0f,  // bl
-                    1.0f, -1.0f,   // br
-                    -1.0f, 1.0f,   // tl
+                    -1.0f, -1.0f,
+                    1.0f, -1.0f,
+                    -1.0f, 1.0f,
 
-                    1.0f, -1.0f,   // br
-                    1.0f, 1.0f,    // tr
-                    -1.0f, 1.0f    // tl
+                    1.0f, -1.0f,
+                    1.0f, 1.0f,
+                    -1.0f, 1.0f
             };
 
             FloatBuffer vertexBuffer = BufferUtils.createFloatBuffer(vertices.length);
@@ -138,17 +139,11 @@ public class Shader {
         if (loc != -1) GL.uniformFloat4(loc, v1, v2, v3, v4);
     }
 
-    public void set(String name, win.transgirls.streamproof.visuals.Color color) {
-        set(name, color.r / 255f, color.g / 255f, color.b / 255f, color.a / 255f);
+    public void set(String name, Color color) {
+        set(name, color.r() / 255f, color.g() / 255f, color.b() / 255f, color.a() / 255f);
     }
 
-//    public void set(String name, Matrix4f mat) {
-//        GL.uniformMatrix(getLocation(name), mat);
-//    }
-
     public void setDefaults() {
-//        set("uProj", RenderSystem.getProjectionMatrix());
-//        set("uModelView", RenderSystem.getModelViewStack());
         set("uResolution", Streamproof.window.getFramebufferWidth(), Streamproof.window.getFramebufferHeight());
         set("uTime", (float) (System.currentTimeMillis() % 100000) / 1000f);
     }

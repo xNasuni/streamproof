@@ -13,8 +13,6 @@ public class Backdrop extends PanelInterface {
 
     @Override
     public void setup() {
-//        this.effects.add(new GlowEffect());
-
         super.setup();
         this.show();
     }

@@ -3,12 +3,11 @@ package win.transgirls.streamproof.types;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.render.VertexConsumerProvider;
 
-public class RenderData {
+public class GuiRenderData {
     public DrawContext graphics;
-    public VertexConsumerProvider.Immediate buffer;
 
-    public static RenderData with(Object graphics) {
-        RenderData data = new RenderData();
+    public static GuiRenderData with(Object graphics) {
+        GuiRenderData data = new GuiRenderData();
         data.graphics = (DrawContext) graphics;
 
         return data;
