@@ -11,7 +11,7 @@ public enum ComponentKind {
     INVENTORY_HUD_POTION("Inventory Hud Potion", ComponentCategory.GUI, true, List.of("dlovin.inventoryhud.gui.InventoryHUDGui")),
     INVENTORY_HUD_INVENTORY("Inventory Hud Inventory", ComponentCategory.GUI, true, List.of("dlovin.inventoryhud.gui.InventoryHUDGui")),
     XAEROS_MINIMAP_MINIMAP("Xaero's Minimap Map", ComponentCategory.GUI, true, List.of("xaero.hud.minimap.module.MinimapRenderer")),
-    XAEROS_MINIMAP_WAYPOINTS("Xaero's Minimap Waypoints", ComponentCategory.GUI, true, List.of("xaero.hud.minimap.waypoint.render.WaypointMapRenderer")),
+    XAEROS_MINIMAP_WAYPOINTS("Xaero's Minimap Waypoints", ComponentCategory.GUI, true, List.of("xaero.common.events.ClientEvents")),
     STREAMPROOF_IMGUI_WINDOW("ImGui Window", ComponentCategory.HIDDEN, true, List.of(""));
 
     public final String label;

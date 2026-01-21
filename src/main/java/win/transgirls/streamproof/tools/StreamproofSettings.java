@@ -16,7 +16,6 @@ import static win.transgirls.streamproof.Streamproof.LOGGER;
 public class StreamproofSettings {
     private final HashMap<ComponentKind, Boolean> loaded;
     private final Gson gson;
-    private final Path settingsDirectory;
     private final Path settingsFile;
     private final AtomicBoolean running;
 
@@ -26,12 +25,12 @@ public class StreamproofSettings {
     public StreamproofSettings() {
         this.loaded = new HashMap<>();
         this.gson = new Gson();
-        this.settingsDirectory = FabricLoader.getInstance().getConfigDir().resolve("streamproof");
+        Path settingsDirectory = FabricLoader.getInstance().getConfigDir().resolve("streamproof");
         this.settingsFile = settingsDirectory.resolve("streamproof.json");
         this.running = new AtomicBoolean(true);
 
         try {
-            Files.createDirectories(this.settingsDirectory);
+            Files.createDirectories(settingsDirectory);
         } catch (IOException e) {
             LOGGER.error("Streamproof failed to create settings directory", e);
         }
