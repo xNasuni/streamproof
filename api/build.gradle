@@ -1,0 +1,14 @@
+plugins {
+    id "java"
+}
+
+group = "win.transgirls.streamproof.api"
+version = "0.1.0"
+
+java {
+    withSourcesJar()
+}
+
+tasks.jar {
+    archiveBaseName.set("streamproof-api")
+}
