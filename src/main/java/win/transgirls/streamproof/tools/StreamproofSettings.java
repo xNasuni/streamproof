@@ -89,7 +89,7 @@ public class StreamproofSettings {
     private void reload() throws IOException {
         JsonObject elem = this.verify();
 
-        for (String id : loaded.keySet()) {
+        for (String id : loaded.keySet().stream().toList()) {
             if (elem.has(id) && elem.get(id).isJsonPrimitive() && elem.getAsJsonPrimitive(id).isBoolean()) {
                 boolean newIsStreamproof = elem.getAsJsonPrimitive(id).getAsBoolean();
                 StreamproofComponent component = loaded.get(id);
