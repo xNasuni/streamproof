@@ -3,6 +3,7 @@ package win.transgirls.streamproof.tools;
 import com.mojang.blaze3d.opengl.GlStateManager;
 import net.minecraft.client.gui.screen.ChatScreen;
 import net.minecraft.client.gui.screen.GameModeSwitcherScreen;
+import net.minecraft.client.render.VertexConsumerProvider;
 import org.lwjgl.opengl.GL11C;
 import win.transgirls.streamproof.Streamproof;
 import win.transgirls.streamproof.api.types.ComponentCategory;
@@ -100,6 +101,15 @@ public class StreamproofImpl implements Impl {
         }
     }
 
+    public void forceDraw(VertexConsumerProvider consumer) {
+        if (consumer instanceof VertexConsumerProvider.Immediate immediate) {
+            if (!immediate.pending.get(immediate.currentLayer).building) {
+                return;
+            }
+            immediate.draw();
+        }
+    }
+
     public void composite() {
         try {
             if (this.overlay != null) {
@@ -108,7 +118,7 @@ public class StreamproofImpl implements Impl {
 
                     if (this.worldFb.colorTexture != -1) {
                         GL.disableBlend();
-                        
+
                         GL.enableDepth();
                         overlay.bind();
                         GL.bindSampler(0, 0);

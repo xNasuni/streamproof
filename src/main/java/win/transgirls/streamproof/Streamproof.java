@@ -60,6 +60,7 @@ public class Streamproof implements ClientModInitializer {
     public static Window window;
 
     public static Set<GuiElementRenderState> renderStates = new HashSet<>();
+    public static Set<Object> renderCommands = new HashSet<>();
     public static Shader overlayShader;
 
     private static boolean anyClassLoaded(List<String> classList) {
@@ -88,7 +89,9 @@ public class Streamproof implements ClientModInitializer {
         StreamproofAPI.add("CHAT_MESSAGES_OVERLAY", "Chat Messages", ComponentCategory.Gui, true);
         StreamproofAPI.add("CHAT_INPUT_OVERLAY", "Chat Input", ComponentCategory.Gui, true);
         StreamproofAPI.add("F3_OVERLAY", "F3", ComponentCategory.Gui, true);
+
         StreamproofAPI.add("DEBUG_HITBOXES", "Hitboxes", ComponentCategory.World, true);
+
         StreamproofAPI.add("STREAMPROOF_IMGUI_WINDOW", "ImGui Window", ComponentCategory.Hidden, true);
 
         if (anyClassLoaded(List.of("dlovin.inventoryhud.gui.InventoryHUDGui"))) {

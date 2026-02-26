@@ -18,3 +18,7 @@ accessible class com/mojang/blaze3d/opengl/GlStateManager$BlendFuncState
 accessible class com/mojang/blaze3d/opengl/GlStateManager$CullFaceState
 accessible class com/mojang/blaze3d/opengl/GlStateManager$DepthTestState
 accessible class com/mojang/blaze3d/opengl/GlStateManager$ScissorTestState
+accessible field net/minecraft/client/render/command/CustomCommandRenderer$Commands customCommands Ljava/util/Map;
+accessible field net/minecraft/client/render/VertexConsumerProvider$Immediate pending Ljava/util/Map;
+accessible field net/minecraft/client/render/VertexConsumerProvider$Immediate currentLayer Lnet/minecraft/client/render/RenderLayer;
+accessible field net/minecraft/client/render/BufferBuilder building Z

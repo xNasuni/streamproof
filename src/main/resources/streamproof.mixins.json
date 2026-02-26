@@ -26,6 +26,11 @@
     "imgui.GameStartMixin",
     "imgui.ImGuiDrawMixin",
     "impl.GuiRendererMixin",
-    "impl.RenderLayerMixin"
+    "impl.RenderLayerMixin",
+    "impl.RenderQueueMixin",
+    "impl.command.CustomCommandMixin",
+    "impl.command.ItemCommandMixin",
+    "impl.command.LayeredCustomCommandMixin",
+    "impl.command.TextCommandMixin"
   ]
 }

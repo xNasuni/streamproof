@@ -14,6 +14,7 @@ public class FramebufferRuntimeMixin {
     @Inject(method = "render", at = @At("HEAD"))
     private void headTick(boolean bl, CallbackInfo ci) {
         Streamproof.renderStates.clear();
+        Streamproof.renderCommands.clear();
         if (StreamproofAPI.getImpl() instanceof StreamproofImpl impl) {
             if (impl.worldFb != null && impl.worldFb.dirty) {
                 impl.worldFb.clear();

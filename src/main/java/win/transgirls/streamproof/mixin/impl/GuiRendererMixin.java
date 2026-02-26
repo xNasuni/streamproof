@@ -116,7 +116,7 @@ public abstract class GuiRendererMixin {
 
     // (xNasuni):
     // ItemGuiElementRenderState transitions into one SimpleGuiElementRenderState, but we should
-    // handle more than one anyway just because it is possible this changes in the future
+    // handle more than one anyway just because it is possible this maybe changes in the future
     @WrapMethod(method = "prepareItem")
     private void wrapPrepareItem(ItemGuiElementRenderState state, float u, float v, int pixelsPerItem, int itemAtlasSideLength, Operation<Void> original) {
         GuiRenderState.Layer currentLayer = this.state.currentLayer;
