@@ -90,6 +90,7 @@ public class Streamproof implements ClientModInitializer {
         StreamproofAPI.add("CHAT_INPUT_OVERLAY", "Chat Input", ComponentCategory.Gui, true);
         StreamproofAPI.add("F3_OVERLAY", "F3", ComponentCategory.Gui, true);
         StreamproofAPI.add("SCOREBOARD", "Scoreboard", ComponentCategory.Gui, false);
+        StreamproofAPI.add("PLAYERLIST", "Player List", ComponentCategory.Gui, false);
 
         StreamproofAPI.add("DEBUG_HITBOXES", "Hitboxes", ComponentCategory.World, true);
         StreamproofAPI.add("MAPS", "Maps", ComponentCategory.World, false);
