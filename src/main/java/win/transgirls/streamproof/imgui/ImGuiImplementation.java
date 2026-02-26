@@ -1,18 +1,20 @@
 package win.transgirls.streamproof.imgui;
 
-import imgui.*;
+import imgui.ImGui;
+import imgui.ImGuiIO;
 import imgui.extension.implot.ImPlot;
-import imgui.flag.ImGuiConfigFlags;
 import imgui.gl3.ImGuiImplGl3;
 import imgui.glfw.ImGuiImplGlfw;
 import org.joml.Math;
-import org.lwjgl.glfw.GLFW;
-import org.lwjgl.opengl.*;
+import org.lwjgl.opengl.GL11C;
+import org.lwjgl.opengl.GL13C;
 import win.transgirls.streamproof.Streamproof;
 import win.transgirls.streamproof.systems.gl.GL;
 import win.transgirls.streamproof.visuals.Color;
 import win.transgirls.streamproof.visuals.Interface;
 import win.transgirls.streamproof.visuals.Style;
+
+import static win.transgirls.streamproof.Streamproof.mc;
 
 public class ImGuiImplementation {
     private final static ImGuiImplGlfw glfw = new ImGuiImplGlfw();
@@ -40,11 +42,12 @@ public class ImGuiImplementation {
     }
 
     public static void draw() {
+        GL.saveRenderFlags();
         Color.tick += Math.PI_f / 512;
 
         ImGuiIO io = ImGui.getIO();
-        if (Streamproof.client != null && Streamproof.window != null) {
-            io.setDisplaySize(Streamproof.window.getFramebufferWidth(), Streamproof.window.getFramebufferHeight());
+        if (mc != null && mc.getWindow() != null) {
+            io.setDisplaySize(mc.getWindow().getFramebufferWidth(), mc.getWindow().getFramebufferHeight());
             io.setDisplayFramebufferScale(1.0f, 1.0f);
         }
 
@@ -54,10 +57,6 @@ public class ImGuiImplementation {
         Interface.render(handle);
 
         ImGui.render();
-
-        GL.saveRenderFlags();
-        GL.saveTextureState();
-        GL.savePixelStore();
 
         GL.activeTexture(GL13C.GL_TEXTURE0);
 
@@ -72,15 +71,6 @@ public class ImGuiImplementation {
 
         gl3.renderDrawData(ImGui.getDrawData());
 
-        GL.restorePixelStore();
-        GL.restoreTextureState();
         GL.restoreRenderFlags();
-
-        if (ImGui.getIO().hasConfigFlags(ImGuiConfigFlags.ViewportsEnable)) {
-            final long pointer = GLFW.glfwGetCurrentContext();
-            ImGui.updatePlatformWindows();
-            ImGui.renderPlatformWindowsDefault();
-            GLFW.glfwMakeContextCurrent(pointer);
-        }
     }
 }

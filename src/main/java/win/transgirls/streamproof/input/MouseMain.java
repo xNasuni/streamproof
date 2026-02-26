@@ -2,12 +2,13 @@ package win.transgirls.streamproof.input;
 
 import net.minecraft.client.input.SystemKeycodes;
 import net.minecraft.client.option.KeyBinding;
-import net.minecraft.client.util.InputUtil;
 import org.lwjgl.glfw.GLFW;
 import win.transgirls.streamproof.Streamproof;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import static win.transgirls.streamproof.Streamproof.mc;
 
 public class MouseMain {
     public static boolean passMouseInput = true;
@@ -15,7 +16,7 @@ public class MouseMain {
     public static HashMap<Integer, Integer> glfwInputModeSave = new HashMap<>();
 
     public static void lockCursor() {
-        if (Streamproof.client.currentScreen != null) {
+        if (mc.currentScreen != null) {
             return;
         }
 
@@ -28,17 +29,17 @@ public class MouseMain {
             KeyBinding.updatePressedStates();
         }
 
-        Streamproof.client.mouse.cursorLocked = true;
-        Streamproof.client.mouse.x = (double) Streamproof.window.getWidth() / 2;
-        Streamproof.client.mouse.y = (double) Streamproof.window.getHeight() / 2;
-        GLFW.glfwSetCursorPos(Streamproof.window.getHandle(), Streamproof.client.mouse.x, Streamproof.client.mouse.y);
+        mc.mouse.cursorLocked = true;
+        mc.mouse.x = (double) Streamproof.window.getWidth() / 2;
+        mc.mouse.y = (double) Streamproof.window.getHeight() / 2;
+        GLFW.glfwSetCursorPos(Streamproof.window.getHandle(), mc.mouse.x, mc.mouse.y);
         GLFW.glfwSetInputMode(Streamproof.window.getHandle(), GLFW.GLFW_CURSOR, GLFW.GLFW_CURSOR_DISABLED);
         glfwSetInputModeBypass = false;
     }
 
     public static void unlockCursor() {
         glfwSetInputModeBypass = true;
-        Streamproof.client.mouse.cursorLocked = false;
+        mc.mouse.cursorLocked = false;
         GLFW.glfwSetInputMode(Streamproof.window.getHandle(), GLFW.GLFW_CURSOR, GLFW.GLFW_CURSOR_NORMAL);
         glfwSetInputModeBypass = false;
     }

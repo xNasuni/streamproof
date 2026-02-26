@@ -5,6 +5,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import net.fabricmc.loader.api.FabricLoader;
+import win.transgirls.streamproof.api.types.ComponentCategory;
 
 import java.io.IOException;
 import java.nio.file.*;
@@ -14,7 +15,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import static win.transgirls.streamproof.Streamproof.LOGGER;
 
 public class StreamproofSettings {
-    private final HashMap<ComponentKind, Boolean> loaded;
+    public final Map<String, StreamproofComponent> loaded;
     private final Gson gson;
     private final Path settingsFile;
     private final AtomicBoolean running;
@@ -23,7 +24,7 @@ public class StreamproofSettings {
     private Thread watchThread;
 
     public StreamproofSettings() {
-        this.loaded = new HashMap<>();
+        this.loaded = new LinkedHashMap<>();
         this.gson = new Gson();
         Path settingsDirectory = FabricLoader.getInstance().getConfigDir().resolve("streamproof");
         this.settingsFile = settingsDirectory.resolve("streamproof.json");
@@ -37,10 +38,6 @@ public class StreamproofSettings {
 
         try {
             this.verify();
-
-            for (ComponentKind kind : this.getKinds()) {
-                this.load(kind);
-            }
 
             this.watcher = FileSystems.getDefault().newWatchService();
             settingsDirectory.register(watcher, StandardWatchEventKinds.ENTRY_MODIFY);
@@ -92,12 +89,12 @@ public class StreamproofSettings {
     private void reload() throws IOException {
         JsonObject elem = this.verify();
 
-        for (ComponentKind kind : loaded.keySet()) {
-            if (elem.has(kind.name()) && elem.get(kind.name()).isJsonPrimitive() && elem.getAsJsonPrimitive(kind.name()).isBoolean()) {
-                boolean newValue = elem.getAsJsonPrimitive(kind.name()).getAsBoolean();
-                if (loaded.get(kind) != newValue) {
-                    loaded.put(kind, newValue);
-                }
+        for (String id : loaded.keySet()) {
+            if (elem.has(id) && elem.get(id).isJsonPrimitive() && elem.getAsJsonPrimitive(id).isBoolean()) {
+                boolean newIsStreamproof = elem.getAsJsonPrimitive(id).getAsBoolean();
+                StreamproofComponent component = loaded.get(id);
+
+                component.isStreamproof = newIsStreamproof;
             }
         }
     }
@@ -128,44 +125,51 @@ public class StreamproofSettings {
         }
     }
 
-    private void write(ComponentKind kind, boolean value) throws IOException {
-        JsonObject elem = this.verify();
-        elem.addProperty(kind.name(), value);
-        Files.write(this.settingsFile, this.gson.toJson(elem).getBytes());
-        this.loaded.put(kind, value);
-    }
-
-    private void load(ComponentKind kind) throws IOException {
-        JsonObject elem = this.verify();
-        if (elem.has(kind.name()) && elem.get(kind.name()).isJsonPrimitive() && elem.getAsJsonPrimitive(kind.name()).isBoolean()) {
-            this.loaded.put(kind, elem.getAsJsonPrimitive(kind.name()).getAsBoolean());
-        } else {
-            write(kind, kind.defaultStreamproof);
+    private void ensureLoaded(String id) {
+        if (!loaded.containsKey(id)) {
+            throw new RuntimeException("Unknown or unloaded streamproof id: " + id);
         }
     }
 
-    public void setStreamproof(ComponentKind kind, boolean streamproof) throws IOException {
-        this.write(kind, streamproof);
+    private void write(String id, boolean value) throws IOException {
+        JsonObject elem = this.verify();
+        elem.addProperty(id, value);
+        Files.write(this.settingsFile, this.gson.toJson(elem).getBytes());
     }
 
-    public boolean isStreamproof(ComponentKind kind) {
-        return this.loaded.getOrDefault(kind, kind.defaultStreamproof);
+    public void load(String id, String label, boolean defaultStreamproof, ComponentCategory category) throws IOException {
+        JsonObject elem = this.verify();
+        boolean isStreamproof = defaultStreamproof;
+
+        if (elem.has(id) && elem.get(id).isJsonPrimitive() && elem.getAsJsonPrimitive(id).isBoolean()) {
+            isStreamproof = elem.getAsJsonPrimitive(id).getAsBoolean();
+        } else {
+            this.write(id, defaultStreamproof);
+        }
+
+        this.loaded.put(id, new StreamproofComponent(id, label, isStreamproof, category));
     }
 
-    public List<ComponentKind> getKinds() {
-        return Arrays.stream(ComponentKind.values()).filter(kind -> !kind.category.equals(ComponentCategory.HIDDEN)).toList();
+    public void set(String id, boolean streamproof) throws IOException {
+        this.getComponent(id).isStreamproof = streamproof;
+        this.write(id, streamproof);
+    }
+
+    public boolean isStreamproof(String id) {
+        return this.getComponent(id).isStreamproof;
+    }
+
+    public StreamproofComponent getComponent(String id) {
+        this.ensureLoaded(id);
+        return this.loaded.get(id);
+    }
+
+    public Collection<StreamproofComponent> getComponents() {
+        return this.loaded.values();
     }
 
     public List<ComponentCategory> getCategories() {
-        return Arrays.stream(ComponentCategory.values()).filter((category -> !category.equals(ComponentCategory.HIDDEN))).toList();
-    }
-
-    public ComponentCategory getCategoryForKind(ComponentKind kind) {
-        if (!this.loaded.containsKey(kind) || !kind.isInstalled) {
-            return ComponentCategory.NOT_FOUND;
-        }
-
-        return kind.category;
+        return Arrays.stream(ComponentCategory.values()).filter((category -> !category.equals(ComponentCategory.Hidden))).toList();
     }
 
     public void stop() {

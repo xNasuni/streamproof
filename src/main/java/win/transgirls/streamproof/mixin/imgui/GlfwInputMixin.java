@@ -1,13 +1,10 @@
-package win.transgirls.streamproof.mixin;
+package win.transgirls.streamproof.mixin.imgui;
 
-import org.lwjgl.glfw.GLFW;
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import org.lwjgl.glfw.GLFW;
 import org.spongepowered.asm.mixin.Mixin;
 import win.transgirls.streamproof.input.MouseMain;
-import win.transgirls.streamproof.visuals.Interface;
-
-import static org.lwjgl.glfw.GLFW.*;
 
 @Mixin(GLFW.class)
 public class GlfwInputMixin {

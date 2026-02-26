@@ -3,7 +3,6 @@ package win.transgirls.streamproof.systems.gl;
 import com.mojang.blaze3d.opengl.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import org.lwjgl.opengl.*;
-import org.lwjgl.system.NativeType;
 
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
@@ -23,8 +22,20 @@ public class GL {
     private static int lastActiveTexture;
     private static int lastSampler;
     private static int lastTexture;
+    private static int copySrcFbo = -1;
+    private static int copyDstFbo = -1;
+
+    public static boolean checkFrameBufferStatus(int target) {
+        int status = GL30C.glCheckFramebufferStatus(target);
+        return status == GL30C.GL_FRAMEBUFFER_COMPLETE;
+    }
 
     public static void bindTexture(int texture) {
+        GlStateManager._bindTexture(texture);
+    }
+
+    public static void bindTexture(int unit, int texture) {
+        GlStateManager._activeTexture(GL13C.GL_TEXTURE0 + unit);
         GlStateManager._bindTexture(texture);
     }
 
@@ -32,8 +43,16 @@ public class GL {
         GL33C.glBindSampler(unit, sampler);
     }
 
+    public static void bindFrameBuffer(int target, int framebuffer) {
+        GlStateManager._glBindFramebuffer(target, framebuffer);
+    }
+
+    public static void frameBufferTexture2D(int target, int attachment, int texTarget, int tex, int level) {
+        GlStateManager._glFramebufferTexture2D(target, attachment, texTarget, tex, level);
+    }
+
     public static void activeTexture(int texture) {
-        GL13C.glActiveTexture(texture);
+        GlStateManager._activeTexture(texture);
     }
 
     public static void blendFunc(int sfactor, int dfactor) {
@@ -42,6 +61,10 @@ public class GL {
 
     public static void enableBlend() {
         GlStateManager._enableBlend();
+    }
+
+    public static void disableScissor() {
+        GlStateManager._disableScissorTest();
     }
 
     public static void disableBlend() {
@@ -57,21 +80,85 @@ public class GL {
     }
 
     public static void setDefaultPixelStore() {
-        GL11C.glPixelStorei(GL11C.GL_UNPACK_ROW_LENGTH, 0);
-        GL11C.glPixelStorei(GL11C.GL_UNPACK_ALIGNMENT, 1);
-        GL11C.glPixelStorei(GL11C.GL_UNPACK_SKIP_PIXELS, 0);
-        GL11C.glPixelStorei(GL11C.GL_UNPACK_SKIP_ROWS, 0);
+        GlStateManager._pixelStore(GL11C.GL_UNPACK_ROW_LENGTH, 0);
+        GlStateManager._pixelStore(GL11C.GL_UNPACK_ALIGNMENT, 1);
+        GlStateManager._pixelStore(GL11C.GL_UNPACK_SKIP_PIXELS, 0);
+        GlStateManager._pixelStore(GL11C.GL_UNPACK_SKIP_ROWS, 0);
     }
 
-    public static void setDefaultTextureParameters() {
-        GL11C.glTexParameteri(GL11C.GL_TEXTURE_2D, GL11C.GL_TEXTURE_MIN_FILTER, GL11C.GL_LINEAR);
-        GL11C.glTexParameteri(GL11C.GL_TEXTURE_2D, GL11C.GL_TEXTURE_MAG_FILTER, GL11C.GL_LINEAR);
-        GL11C.glTexParameteri(GL11C.GL_TEXTURE_2D, GL11C.GL_TEXTURE_WRAP_S, GL12C.GL_CLAMP_TO_EDGE);
-        GL11C.glTexParameteri(GL11C.GL_TEXTURE_2D, GL11C.GL_TEXTURE_WRAP_T, GL12C.GL_CLAMP_TO_EDGE);
+    public static void setDefaultColorTextureParameters() {
+        GlStateManager._texParameter(GL11C.GL_TEXTURE_2D, GL11C.GL_TEXTURE_MIN_FILTER, GL11C.GL_LINEAR);
+        GlStateManager._texParameter(GL11C.GL_TEXTURE_2D, GL11C.GL_TEXTURE_MAG_FILTER, GL11C.GL_LINEAR);
+        GlStateManager._texParameter(GL11C.GL_TEXTURE_2D, GL11C.GL_TEXTURE_WRAP_S, GL12C.GL_CLAMP_TO_EDGE);
+        GlStateManager._texParameter(GL11C.GL_TEXTURE_2D, GL11C.GL_TEXTURE_WRAP_T, GL12C.GL_CLAMP_TO_EDGE);
+    }
+
+    public static void setDefaultDepthTextureParameters() {
+        GlStateManager._texParameter(GL11C.GL_TEXTURE_2D, GL11C.GL_TEXTURE_MIN_FILTER, GL11C.GL_NEAREST);
+        GlStateManager._texParameter(GL11C.GL_TEXTURE_2D, GL11C.GL_TEXTURE_MAG_FILTER, GL11C.GL_NEAREST);
+        GlStateManager._texParameter(GL11C.GL_TEXTURE_2D, GL11C.GL_TEXTURE_WRAP_S, GL12C.GL_CLAMP_TO_EDGE);
+        GlStateManager._texParameter(GL11C.GL_TEXTURE_2D, GL11C.GL_TEXTURE_WRAP_T, GL12C.GL_CLAMP_TO_EDGE);
     }
 
     public static void uploadTexture2D(int target, int level, int internalformat, int width, int height, int border, int format, int type, ByteBuffer pixels) {
         GL11C.glTexImage2D(target, level, internalformat, width, height, border, format, type, pixels);
+    }
+
+    public static void debugTextureDifference(int srcTex, int dstTex) {
+        int[] srcInfo = getTextureInfo(srcTex);
+        int[] dstInfo = getTextureInfo(dstTex);
+
+        LOGGER.info("--- Texture Comparison ---");
+        LOGGER.info("Source (MC): {}x{} | Format: 0x{}", srcInfo[0], srcInfo[1], Integer.toHexString(srcInfo[2]));
+        LOGGER.info("Dest (Mine): {}x{} | Format: 0x{}", dstInfo[0], dstInfo[1], Integer.toHexString(dstInfo[2]));
+
+        if (srcInfo[2] != dstInfo[2]) {
+            LOGGER.error("CRITICAL: Internal Format Mismatch! Blit will fail.");
+        }
+        if (srcInfo[0] != dstInfo[0] || srcInfo[1] != dstInfo[1]) {
+            LOGGER.warn("Size mismatch: Blit will scale the image.");
+        }
+    }
+
+    private static int[] getTextureInfo(int tex) {
+        GL11C.glBindTexture(GL11C.GL_TEXTURE_2D, tex);
+        int w = GL11C.glGetTexLevelParameteri(GL11C.GL_TEXTURE_2D, 0, GL11C.GL_TEXTURE_WIDTH);
+        int h = GL11C.glGetTexLevelParameteri(GL11C.GL_TEXTURE_2D, 0, GL11C.GL_TEXTURE_HEIGHT);
+        int format = GL11C.glGetTexLevelParameteri(GL11C.GL_TEXTURE_2D, 0, GL11C.GL_TEXTURE_INTERNAL_FORMAT);
+        return new int[]{w, h, format};
+    }
+
+    public static void copyDepth(int srcTex, int dstTex, int width, int height) {
+        if (copySrcFbo == -1) copySrcFbo = GL.genFrameBuffers();
+        if (copyDstFbo == -1) copyDstFbo = GL.genFrameBuffers();
+
+        int oReadFbo = GlStateManager.getFrameBuffer(GL30C.GL_READ_FRAMEBUFFER);
+        int oWriteFbo = GlStateManager.getFrameBuffer(GL30C.GL_DRAW_FRAMEBUFFER);
+
+        GL.bindFrameBuffer(GL30C.GL_READ_FRAMEBUFFER, copySrcFbo);
+        GL.frameBufferTexture2D(GL30C.GL_READ_FRAMEBUFFER, GL30C.GL_DEPTH_ATTACHMENT, GL11C.GL_TEXTURE_2D, srcTex, 0);
+
+        GL.bindFrameBuffer(GL30C.GL_DRAW_FRAMEBUFFER, copyDstFbo);
+        GL.frameBufferTexture2D(GL30C.GL_DRAW_FRAMEBUFFER, GL30C.GL_DEPTH_ATTACHMENT, GL11C.GL_TEXTURE_2D, dstTex, 0);
+
+        GlStateManager._glBlitFrameBuffer(0, 0, width, height, 0, 0, width, height, GL11C.GL_DEPTH_BUFFER_BIT, GL11C.GL_NEAREST);
+
+        GlStateManager._glBindFramebuffer(GL30C.GL_READ_FRAMEBUFFER, oReadFbo);
+        GlStateManager._glBindFramebuffer(GL30C.GL_DRAW_FRAMEBUFFER, oWriteFbo);
+    }
+
+    public static void copyDepthFromScreen(int fbo, int width, int height) {
+        GlStateManager._glBindFramebuffer(GL30C.GL_READ_FRAMEBUFFER, 0);
+        GlStateManager._glBindFramebuffer(GL30C.GL_DRAW_FRAMEBUFFER, fbo);
+
+        GlStateManager._glBlitFrameBuffer(
+                0, 0, width, height,
+                0, 0, width, height,
+                GL11C.GL_DEPTH_BUFFER_BIT,
+                GL11C.GL_NEAREST
+        );
+
+        GlStateManager._glBindFramebuffer(GL30C.GL_FRAMEBUFFER, 0);
     }
 
     public static void saveTextureState() {
@@ -87,35 +174,39 @@ public class GL {
     }
 
     public static void saveRenderFlags() {
-        lastBlend = GL11C.glIsEnabled(GL11C.GL_BLEND);
-        lastCullFace = GL11C.glIsEnabled(GL11C.GL_CULL_FACE);
-        lastDepthTest = GL11C.glIsEnabled(GL11C.GL_DEPTH_TEST);
-        lastScissorTest = GL11C.glIsEnabled(GL11C.GL_SCISSOR_TEST);
+        lastBlend = GlStateManager.BLEND.capState.state;
+        lastCullFace = GlStateManager.CULL.capState.state;
+        lastDepthTest = GlStateManager.DEPTH.capState.state;
+        lastScissorTest = GlStateManager.SCISSOR.capState.state;
     }
 
     public static void restoreRenderFlags() {
-        if (lastBlend) GL11C.glEnable(GL11C.GL_BLEND);
-        else GL11C.glDisable(GL11C.GL_BLEND);
-        if (lastCullFace) GL11C.glEnable(GL11C.GL_CULL_FACE);
-        else GL11C.glDisable(GL11C.GL_CULL_FACE);
-        if (lastDepthTest) GL11C.glEnable(GL11C.GL_DEPTH_TEST);
-        else GL11C.glDisable(GL11C.GL_DEPTH_TEST);
-        if (lastScissorTest) GL11C.glEnable(GL11C.GL_SCISSOR_TEST);
-        else GL11C.glDisable(GL11C.GL_SCISSOR_TEST);
+        if (lastBlend) GlStateManager._enableBlend();
+        else GlStateManager._disableBlend();
+        if (lastCullFace) GlStateManager._enableCull();
+        else GlStateManager._disableCull();
+        if (lastDepthTest) GlStateManager._enableDepthTest();
+        else GlStateManager._disableDepthTest();
+        if (lastScissorTest) GlStateManager._enableScissorTest();
+        else GlStateManager._disableScissorTest();
     }
 
     public static void savePixelStore() {
-        lastUnpackRowLen = GL11C.glGetInteger(GL11C.GL_UNPACK_ROW_LENGTH);
-        lastUnpackAlignment = GL11C.glGetInteger(GL11C.GL_UNPACK_ALIGNMENT);
-        lastUnpackSkipPixels = GL11C.glGetInteger(GL11C.GL_UNPACK_SKIP_PIXELS);
-        lastUnpackSkipRows = GL11C.glGetInteger(GL11C.GL_UNPACK_SKIP_ROWS);
+        lastUnpackRowLen = GlStateManager._getInteger(GL11C.GL_UNPACK_ROW_LENGTH);
+        lastUnpackAlignment = GlStateManager._getInteger(GL11C.GL_UNPACK_ALIGNMENT);
+        lastUnpackSkipPixels = GlStateManager._getInteger(GL11C.GL_UNPACK_SKIP_PIXELS);
+        lastUnpackSkipRows = GlStateManager._getInteger(GL11C.GL_UNPACK_SKIP_ROWS);
     }
 
     public static void restorePixelStore() {
-        GL11C.glPixelStorei(GL11C.GL_UNPACK_ROW_LENGTH, lastUnpackRowLen);
-        GL11C.glPixelStorei(GL11C.GL_UNPACK_ALIGNMENT, lastUnpackAlignment);
-        GL11C.glPixelStorei(GL11C.GL_UNPACK_SKIP_PIXELS, lastUnpackSkipPixels);
-        GL11C.glPixelStorei(GL11C.GL_UNPACK_SKIP_ROWS, lastUnpackSkipRows);
+        GlStateManager._pixelStore(GL11C.GL_UNPACK_ROW_LENGTH, lastUnpackRowLen);
+        GlStateManager._pixelStore(GL11C.GL_UNPACK_ALIGNMENT, lastUnpackAlignment);
+        GlStateManager._pixelStore(GL11C.GL_UNPACK_SKIP_PIXELS, lastUnpackSkipPixels);
+        GlStateManager._pixelStore(GL11C.GL_UNPACK_SKIP_ROWS, lastUnpackSkipRows);
+    }
+
+    public static void depthMask(boolean mask) {
+        GlStateManager._depthMask(mask);
     }
 
     public static void depthFunc(int func) {
@@ -130,16 +221,28 @@ public class GL {
         GlStateManager._disableDepthTest();
     }
 
+    public static void disableCull() {
+        GlStateManager._disableCull();
+    }
+
     public static int genTexture() {
         return GlStateManager._genTexture();
     }
 
-    public static int genVertexArray() {
+    public static int genVertexArrays() {
         return GlStateManager._glGenVertexArrays();
     }
 
-    public static int genBuffer() {
+    public static int genBuffers() {
         return GlStateManager._glGenBuffers();
+    }
+
+    public static int genFrameBuffers() {
+        return GlStateManager.glGenFramebuffers();
+    }
+
+    public static int getBoundFramebuffer() {
+        return GlStateManager.getFrameBuffer(GL30C.GL_DRAW_FRAMEBUFFER);
     }
 
     public static void bindVertexArray(int array) {
@@ -195,6 +298,14 @@ public class GL {
         GlStateManager._glDeleteBuffers(buffer);
     }
 
+    public static void deleteFrameBuffers(int fbo) {
+        GlStateManager._glDeleteFramebuffers(fbo);
+    }
+
+    public static void deleteTexture(int tex) {
+        GlStateManager._deleteTexture(tex);
+    }
+
     public static void deleteVertexArray(int vao) {
         RenderSystem.assertOnRenderThread();
         GL30C.glDeleteVertexArrays(vao);
@@ -245,5 +356,13 @@ public class GL {
 
     public static void useProgram(int program) {
         GlStateManager._glUseProgram(program);
+    }
+
+    public static void clearColor(float r, float g, float b, float a) {
+        GL11C.glClearColor(r, g, b, a);
+    }
+
+    public static void clearColorBuffer() {
+        GlStateManager._clear(GL11C.GL_COLOR_BUFFER_BIT);
     }
 }

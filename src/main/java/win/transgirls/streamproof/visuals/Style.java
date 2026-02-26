@@ -1,11 +1,12 @@
 package win.transgirls.streamproof.visuals;
 
 
-import com.mojang.blaze3d.opengl.GlStateManager;
-import imgui.*;
+import imgui.ImFont;
+import imgui.ImFontConfig;
+import imgui.ImGui;
+import imgui.ImGuiIO;
 import imgui.flag.ImGuiCol;
-import org.lwjgl.BufferUtils;
-import org.lwjgl.opengl.*;
+import org.lwjgl.opengl.GL11C;
 import org.lwjgl.stb.STBImage;
 import org.lwjgl.system.MemoryUtil;
 import win.transgirls.streamproof.Streamproof;
@@ -16,7 +17,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
 import static win.transgirls.streamproof.Streamproof.LOGGER;
 import static win.transgirls.streamproof.visuals.Color.rgba;
@@ -25,7 +27,6 @@ public class Style {
     public static Map<Integer, ImFont> fonts = new HashMap<>();
     public static int iconTexture = -1;
     public static Shader backdropShader = new Shader("backdrop");
-
 
     public static void setup() {
         final ImGuiIO data = ImGui.getIO();
@@ -141,7 +142,7 @@ public class Style {
 
             GL.bindTexture(textureId);
             GL.setDefaultPixelStore();
-            GL.setDefaultTextureParameters();
+            GL.setDefaultColorTextureParameters();
 
             GL.uploadTexture2D(GL11C.GL_TEXTURE_2D, 0, GL11C.GL_RGBA, width, height, 0, GL11C.GL_RGBA, GL11C.GL_UNSIGNED_BYTE, imageBuffer);
 

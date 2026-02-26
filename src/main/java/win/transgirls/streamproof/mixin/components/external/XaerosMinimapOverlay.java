@@ -2,20 +2,18 @@ package win.transgirls.streamproof.mixin.components.external;
 
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.render.RenderTickCounter;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.Coerce;
-import win.transgirls.streamproof.Streamproof;
-import win.transgirls.streamproof.tools.ComponentKind;
-import xaero.hud.minimap.module.MinimapRenderer;
-import xaero.hud.minimap.module.MinimapSession;
-import xaero.hud.render.module.ModuleRenderContext;
+import win.transgirls.streamproof.api.StreamproofAPI;
+import xaero.common.events.ModClientEvents;
 
-@Mixin(MinimapRenderer.class)
+@Mixin(ModClientEvents.class)
 public class XaerosMinimapOverlay {
-    @WrapMethod(method = "render(Lxaero/hud/minimap/module/MinimapSession;Lxaero/hud/render/module/ModuleRenderContext;Lnet/minecraft/class_332;F)V")
-    private void wrapRender(MinimapSession session, ModuleRenderContext c, @Coerce Object graphics, float partialTicks, Operation<Void> original) {
-        Streamproof.renderQueue.deferGui(Streamproof.settings.isStreamproof(ComponentKind.XAEROS_MINIMAP_MINIMAP), graphics, (data) -> {
-            original.call(session, c, data.graphics, partialTicks);
-        });
+    @WrapMethod(method = "handleRenderModOverlay")
+    private void wrapRenderMinimap(DrawContext guiGraphics, RenderTickCounter deltaTracker, Operation<Void> original) {
+        StreamproofAPI.begin("XAEROS_MINIMAP_MINIMAP");
+        original.call(guiGraphics, deltaTracker);
+        StreamproofAPI.end("XAEROS_MINIMAP_MINIMAP");
     }
 }

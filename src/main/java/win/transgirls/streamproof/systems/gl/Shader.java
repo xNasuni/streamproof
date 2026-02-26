@@ -80,8 +80,8 @@ public class Shader {
             FloatBuffer vertexBuffer = BufferUtils.createFloatBuffer(vertices.length);
             vertexBuffer.put(vertices).flip();
 
-            cachedVao = GL.genVertexArray();
-            cachedVbo = GL.genBuffer();
+            cachedVao = GL.genVertexArrays();
+            cachedVbo = GL.genBuffers();
 
             GL.bindVertexArray(cachedVao);
             GL.bindBuffer(GL_ARRAY_BUFFER, cachedVbo);
@@ -97,8 +97,6 @@ public class Shader {
         GL.bindVertexArray(cachedVao);
         GL.drawArrays(GL_TRIANGLES, 0, 6);
         GL.bindVertexArray(0);
-
-        GL.enableDepth();
     }
 
     private int getLocation(String name) {
@@ -141,6 +139,14 @@ public class Shader {
 
     public void set(String name, Color color) {
         set(name, color.r() / 255f, color.g() / 255f, color.b() / 255f, color.a() / 255f);
+    }
+
+    public void setTexture(String uniformName, int textureId, int unit) {
+        int loc = getLocation(uniformName);
+        if (loc == -1) return;
+
+        GL.bindTexture(unit, textureId);
+        GL.uniformInt(loc, unit);
     }
 
     public void setDefaults() {

@@ -5,29 +5,28 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import dlovin.inventoryhud.gui.InventoryHUDGui;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.Coerce;
-import win.transgirls.streamproof.Streamproof;
-import win.transgirls.streamproof.tools.ComponentKind;
+import win.transgirls.streamproof.api.StreamproofAPI;
 
 @Mixin(InventoryHUDGui.class)
 public class InventoryHudOverlay {
     @WrapMethod(method = "renderArmor")
     private void wrapArmor(@Coerce Object graphics, int width, int height, Operation<Void> original) {
-        Streamproof.renderQueue.deferGui(Streamproof.settings.isStreamproof(ComponentKind.INVENTORY_HUD_ARMOR), graphics, (data) -> {
-            original.call(data.graphics, width, height);
-        });
+        StreamproofAPI.begin("INVENTORY_HUD_ARMOR");
+        original.call(graphics, width, height);
+        StreamproofAPI.end("INVENTORY_HUD_ARMOR");
     }
 
     @WrapMethod(method = "renderPotion")
     private void wrapPotion(@Coerce Object graphics, int width, int height, Operation<Void> original) {
-        Streamproof.renderQueue.deferGui(Streamproof.settings.isStreamproof(ComponentKind.INVENTORY_HUD_POTION), graphics, (data) -> {
-            original.call(data.graphics, width, height);
-        });
+        StreamproofAPI.begin("INVENTORY_HUD_POTION");
+        original.call(graphics, width, height);
+        StreamproofAPI.end("INVENTORY_HUD_POTION");
     }
 
     @WrapMethod(method = "renderInventory")
     private void wrapInventory(@Coerce Object graphics, @Coerce Object deltaTracker, Operation<Void> original) {
-        Streamproof.renderQueue.deferGui(Streamproof.settings.isStreamproof(ComponentKind.INVENTORY_HUD_INVENTORY), graphics, (data) -> {
-            original.call(data.graphics, deltaTracker);
-        });
+        StreamproofAPI.begin("INVENTORY_HUD_INVENTORY");
+        original.call(graphics, deltaTracker);
+        StreamproofAPI.end("INVENTORY_HUD_INVENTORY");
     }
 }

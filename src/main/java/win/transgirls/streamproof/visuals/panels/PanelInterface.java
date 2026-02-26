@@ -23,6 +23,7 @@ public class PanelInterface {
         }
     }
 
+    @SuppressWarnings("unchecked")
     protected <T> T getEffect(Class<T> clazz) {
         for (EffectInterface effect : this.effects) {
             if (effect.getClass().equals(clazz)) {
@@ -32,6 +33,7 @@ public class PanelInterface {
         return null;
     }
 
+    @SuppressWarnings("unchecked")
     protected <T> T getPanel(Class<T> clazz) {
         for (PanelInterface otherPanel : PanelInterface.panels) {
             if (otherPanel.getClass().equals(clazz)) {

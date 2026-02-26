@@ -8,15 +8,14 @@ import net.minecraft.client.render.state.CameraRenderState;
 import net.minecraft.client.util.math.MatrixStack;
 import org.joml.Matrix4f;
 import org.spongepowered.asm.mixin.Mixin;
-import win.transgirls.streamproof.Streamproof;
-import win.transgirls.streamproof.tools.ComponentKind;
+import win.transgirls.streamproof.api.StreamproofAPI;
 
 @Mixin(GizmoDrawerImpl.class)
 public class DebugHitboxes {
     @WrapMethod(method = "draw")
-    private void wrapGizmoDraw(MatrixStack matrices, VertexConsumerProvider vertexConsumers, CameraRenderState cameraRenderState, Matrix4f posMatrix, Operation<Void> original) throws CloneNotSupportedException {
-        Streamproof.renderQueue.deferWorld(Streamproof.settings.isStreamproof(ComponentKind.DEBUG_HITBOXES), matrices, vertexConsumers, (data) -> {
-            original.call(data.stack, data.buffers, cameraRenderState, posMatrix);
-        });
+    private void wrapGizmoDraw(MatrixStack matrices, VertexConsumerProvider vertexConsumers, CameraRenderState cameraRenderState, Matrix4f posMatrix, Operation<Void> original) {
+        StreamproofAPI.beginImmediate("DEBUG_HITBOXES");
+        original.call(matrices, vertexConsumers, cameraRenderState, posMatrix);
+        StreamproofAPI.endImmediate("DEBUG_HITBOXES");
     }
 }

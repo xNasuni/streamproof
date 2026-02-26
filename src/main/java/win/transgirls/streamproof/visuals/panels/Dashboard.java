@@ -1,15 +1,18 @@
 package win.transgirls.streamproof.visuals.panels;
 
 
-import imgui.*;
+import imgui.ImDrawList;
+import imgui.ImGui;
+import imgui.ImGuiIO;
+import imgui.ImVec2;
 import imgui.flag.ImGuiCol;
 import imgui.flag.ImGuiCond;
 import imgui.flag.ImGuiStyleVar;
 import imgui.flag.ImGuiWindowFlags;
 import net.minecraft.SharedConstants;
 import win.transgirls.streamproof.Streamproof;
-import win.transgirls.streamproof.tools.ComponentCategory;
-import win.transgirls.streamproof.tools.ComponentKind;
+import win.transgirls.streamproof.api.types.ComponentCategory;
+import win.transgirls.streamproof.tools.StreamproofComponent;
 import win.transgirls.streamproof.visuals.Color;
 import win.transgirls.streamproof.visuals.Style;
 import win.transgirls.streamproof.visuals.candy.EffectOrder;
@@ -122,10 +125,10 @@ public class Dashboard extends PanelInterface {
             ImGui.calcTextSize(categorySize, category.label);
 
             float maxWidth = categorySize.x;
-            for (ComponentKind kind : Streamproof.settings.getKinds()) {
-                if (Streamproof.settings.getCategoryForKind(kind).equals(category)) {
+            for (StreamproofComponent component : Streamproof.settings.getComponents()) {
+                if (component.category.equals(category)) {
                     ImVec2 labelSize = new ImVec2();
-                    ImGui.calcTextSize(labelSize, kind.label);
+                    ImGui.calcTextSize(labelSize, component.label);
 
                     float textWidth = labelSize.x;
                     maxWidth = Math.max(maxWidth, textWidth);
@@ -133,7 +136,7 @@ public class Dashboard extends PanelInterface {
             }
 
             float childWidth = maxWidth + 40;
-            boolean transparent = category.equals(ComponentCategory.NOT_FOUND);
+            boolean transparent = category.equals(ComponentCategory.Other);
 
             if (transparent) {
                 ImGui.pushStyleVar(ImGuiStyleVar.Alpha, 0.5f);
@@ -143,12 +146,11 @@ public class Dashboard extends PanelInterface {
                 ImGui.text(category.label);
                 ImGui.separator();
 
-                for (ComponentKind kind : Streamproof.settings.getKinds()) {
-                    if (Streamproof.settings.getCategoryForKind(kind).equals(category)) {
-                        boolean enabled = Streamproof.settings.isStreamproof(kind);
-                        if (ImGui.checkbox(kind.label, enabled)) {
+                for (StreamproofComponent component : Streamproof.settings.getComponents()) {
+                    if (component.category.equals(category)) {
+                        if (ImGui.checkbox(component.label, component.isStreamproof)) {
                             try {
-                                Streamproof.settings.setStreamproof(kind, !enabled);
+                                Streamproof.settings.set(component.id, !component.isStreamproof);
                             } catch (IOException e) {
                                 LOGGER.error("Failed to save setting", e);
                             }
@@ -168,14 +170,13 @@ public class Dashboard extends PanelInterface {
     }
 
     public void renderExtras() {
-        ComponentKind kind = ComponentKind.STREAMPROOF_IMGUI_WINDOW;
+        StreamproofComponent component = Streamproof.settings.getComponent("STREAMPROOF_IMGUI_WINDOW");
 
-        boolean enabled = Streamproof.settings.isStreamproof(kind);
-        if (ImGui.checkbox(kind.label, enabled)) {
+        if (ImGui.checkbox(component.label, component.isStreamproof)) {
             try {
-                Streamproof.settings.setStreamproof(kind, !enabled);
+                Streamproof.settings.set(component.id, !component.isStreamproof);
             } catch (IOException e) {
-                LOGGER.error("Failed to save setting", e);
+                LOGGER.error("Streamproof failed to save setting", e);
             }
         }
     }

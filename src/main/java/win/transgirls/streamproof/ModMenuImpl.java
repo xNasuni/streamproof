@@ -10,6 +10,8 @@ import win.transgirls.streamproof.visuals.Interface;
 
 import java.util.function.Consumer;
 
+import static win.transgirls.streamproof.Streamproof.mc;
+
 public class ModMenuImpl implements ModMenuApi {
     @Override
     public void attachModpackBadges(@NotNull Consumer<String> consumer) {
@@ -45,7 +47,7 @@ public class ModMenuImpl implements ModMenuApi {
 
         @Override
         public void close() {
-            Streamproof.client.setScreen(this.parent);
+            mc.setScreen(this.parent);
         }
     }
 }
