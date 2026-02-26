@@ -20,6 +20,7 @@
     "components.base.ChatInputOverlay",
     "components.base.F3Overlay",
     "components.base.world.DebugHitboxes",
+    "components.base.world.WorldMap",
     "components.external.InventoryHudOverlay",
     "components.external.XaerosWaypointOverlay",
     "imgui.GameInputMixin",

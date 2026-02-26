@@ -91,6 +91,7 @@ public class Streamproof implements ClientModInitializer {
         StreamproofAPI.add("F3_OVERLAY", "F3", ComponentCategory.Gui, true);
 
         StreamproofAPI.add("DEBUG_HITBOXES", "Hitboxes", ComponentCategory.World, true);
+        StreamproofAPI.add("MAPS", "Maps", ComponentCategory.World, false);
 
         StreamproofAPI.add("STREAMPROOF_IMGUI_WINDOW", "ImGui Window", ComponentCategory.Hidden, true);
 
