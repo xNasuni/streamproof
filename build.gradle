@@ -47,7 +47,7 @@ dependencies {
 
     include(modImplementation("maven.modrinth:crossfabric:0.1.2"))
 
-    implementation project(':api')
+    include(implementation project(':api'))
 }
 
 loom {
