@@ -3,8 +3,6 @@
   "package": "win.transgirls.streamproof.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
-    "components.external.XaerosMinimapOverlay",
-    "imgui.GlfwInputMixin"
   ],
   "injectors": {
     "defaultRequire": 0
@@ -21,12 +19,15 @@
     "components.base.F3Overlay",
     "components.base.PlayerListOverlay",
     "components.base.ScoreboardOverlay",
+    "components.base.SubtitlesOverlay",
     "components.base.world.DebugHitboxes",
     "components.base.world.WorldMap",
     "components.external.InventoryHudOverlay",
+    "components.external.XaerosMinimapOverlay",
     "components.external.XaerosWaypointOverlay",
     "imgui.GameInputMixin",
     "imgui.GameStartMixin",
+    "imgui.GlfwInputMixin",
     "imgui.ImGuiDrawMixin",
     "impl.GuiRendererMixin",
     "impl.RenderLayerMixin",

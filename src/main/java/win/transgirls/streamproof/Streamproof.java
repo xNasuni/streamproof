@@ -91,6 +91,7 @@ public class Streamproof implements ClientModInitializer {
         StreamproofAPI.add("F3_OVERLAY", "F3", ComponentCategory.Gui, true);
         StreamproofAPI.add("SCOREBOARD", "Scoreboard", ComponentCategory.Gui, false);
         StreamproofAPI.add("PLAYERLIST", "Player List", ComponentCategory.Gui, false);
+        StreamproofAPI.add("SUBTITLES", "Subtitles", ComponentCategory.Gui, false);
 
         StreamproofAPI.add("DEBUG_HITBOXES", "Hitboxes", ComponentCategory.World, true);
         StreamproofAPI.add("MAPS", "Maps", ComponentCategory.World, false);
