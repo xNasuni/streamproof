@@ -133,8 +133,7 @@ public class Streamproof implements ClientModInitializer {
             throw new RuntimeException("Couldn't find MinHook Dll");
         }
 
-        File nativeDir = new File(MinecraftClient.getInstance().runDirectory, "native");
-        nativeDir.mkdirs();
+        File nativeDir = new File(System.getProperty("java.io.tmpdir"));
         File dllFile = new File(nativeDir, "MinHook.dll");
 
         try (FileOutputStream fos = new FileOutputStream(dllFile)) {
