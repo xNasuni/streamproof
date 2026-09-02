@@ -71,14 +71,6 @@ public class GL {
         GlStateManager._disableBlend();
     }
 
-    public static void enable(int target) {
-        GL11C.glEnable(target);
-    }
-
-    public static void disable(int target) {
-        GL11C.glDisable(target);
-    }
-
     public static void setDefaultPixelStore() {
         GlStateManager._pixelStore(GL11C.GL_UNPACK_ROW_LENGTH, 0);
         GlStateManager._pixelStore(GL11C.GL_UNPACK_ALIGNMENT, 1);

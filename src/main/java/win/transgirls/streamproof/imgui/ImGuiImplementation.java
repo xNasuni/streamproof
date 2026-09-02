@@ -61,11 +61,11 @@ public class ImGuiImplementation {
         GL.activeTexture(GL13C.GL_TEXTURE0);
 
         GL.bindSampler(0, 0);
-        GL.enable(GL11C.GL_BLEND);
+        GL.enableBlend();
         GL.blendFunc(GL11C.GL_SRC_ALPHA, GL11C.GL_ONE_MINUS_SRC_ALPHA);
-        GL.disable(GL11C.GL_CULL_FACE);
-        GL.disable(GL11C.GL_DEPTH_TEST);
-        GL.disable(GL11C.GL_SCISSOR_TEST);
+        GL.disableCull();
+        GL.disableDepth();
+        GL.disableScissor();
 
         GL.setDefaultPixelStore();
 
