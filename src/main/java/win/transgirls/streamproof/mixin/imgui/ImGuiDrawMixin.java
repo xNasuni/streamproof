@@ -13,7 +13,7 @@ import win.transgirls.streamproof.imgui.ImGuiImplementation;
 public class ImGuiDrawMixin {
     @WrapMethod(method = "flipFrame")
     private static void wrapFlip(Window window, TracyFrameCapturer capturer, Operation<Void> original) {
-        if (!Streamproof.obsWrapper.hooked || !Streamproof.settings.isStreamproof("STREAMPROOF_IMGUI_WINDOW")) {
+        if (!Streamproof.swapBufferHook.hooked || !Streamproof.settings.isStreamproof("STREAMPROOF_IMGUI_WINDOW")) {
             if (ImGuiImplementation.initialized) {
                 ImGuiImplementation.draw();
             }

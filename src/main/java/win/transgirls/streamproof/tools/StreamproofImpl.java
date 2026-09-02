@@ -48,7 +48,7 @@ public class StreamproofImpl implements Impl {
 
     @Override
     public boolean isStreamproof(String id) {
-        return Streamproof.obsWrapper.hooked && Streamproof.settings.isStreamproof(id);
+        return Streamproof.swapBufferHook.hooked && Streamproof.settings.isStreamproof(id);
     }
 
     @Override

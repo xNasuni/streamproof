@@ -11,6 +11,8 @@ public interface MinHook extends StdCallLibrary {
 
     int MH_EnableHook(Pointer method);
 
+    int MH_DisableHook(Pointer method);
+
     int MH_RemoveHook(Pointer method);
 
     interface GlSwapBuffers extends StdCallCallback {

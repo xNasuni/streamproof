@@ -25,8 +25,8 @@ import win.transgirls.streamproof.input.KeyAction;
 import win.transgirls.streamproof.input.KeyboardMain;
 import win.transgirls.streamproof.input.MinecraftKeybind;
 import win.transgirls.streamproof.systems.gl.Shader;
-import win.transgirls.streamproof.tools.ObsWrapper;
 import win.transgirls.streamproof.tools.StreamproofImpl;
+import win.transgirls.streamproof.tools.SwapBufferHook;
 import win.transgirls.streamproof.tools.StreamproofSettings;
 import win.transgirls.streamproof.types.MinHook;
 import win.transgirls.streamproof.visuals.Interface;
@@ -53,7 +53,7 @@ public class Streamproof implements ClientModInitializer {
             SoundEvent.of(Identifier.of("streamproof", "failure"));
 
     public static final StreamproofSettings settings = new StreamproofSettings();
-    public static ObsWrapper obsWrapper;
+    public static SwapBufferHook swapBufferHook;
     public static PointerByReference wglSwapBuffersObs;
     public static MinHook minhook = null;
     public static MinecraftClient mc;
@@ -80,6 +80,8 @@ public class Streamproof implements ClientModInitializer {
     public static void lateInit() {
         ImGuiImplementation.create(window.getHandle());
         Interface.init();
+
+        Streamproof.swapBufferHook = new SwapBufferHook();
 
         overlayShader = new Shader("overlay");
         if (_global_impl instanceof StreamproofImpl impl) {
@@ -171,7 +173,6 @@ public class Streamproof implements ClientModInitializer {
         KeyBindingHelper.registerKeyBinding(closeConfig);
 
         Streamproof.mc = MinecraftClient.getInstance();
-        Streamproof.obsWrapper = new ObsWrapper();
         LOGGER.info("Streamproof loaded successfully ;3");
 
         KeyboardMain.on(new MinecraftKeybind(toggleConfig, (action) -> {
@@ -187,7 +188,7 @@ public class Streamproof implements ClientModInitializer {
         }));
 
         ClientLifecycleEvents.CLIENT_STOPPING.register(client -> {
-            Streamproof.obsWrapper.stop();
+            Streamproof.swapBufferHook.stop();
             Streamproof.settings.stop();
         });
     }
