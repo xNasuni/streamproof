@@ -12,6 +12,7 @@ import net.minecraft.client.util.InputUtil;
 import net.minecraft.client.util.Window;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.profiler.Profiler;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.lwjgl.glfw.GLFW;
@@ -35,9 +36,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class Streamproof implements ClientModInitializer {
     @SuppressWarnings("unused")
@@ -62,6 +61,11 @@ public class Streamproof implements ClientModInitializer {
     public static Set<GuiElementRenderState> renderStates = new HashSet<>();
     public static Set<Object> renderCommands = new HashSet<>();
     public static Shader overlayShader;
+    private static final Map<Profiler, List<String>> STACKS = new WeakHashMap<>();
+
+    public static List<String> stackFor(Profiler profiler) {
+        return STACKS.computeIfAbsent(profiler, p -> new ArrayList<>());
+    }
 
     private static boolean anyClassLoaded(List<String> classList) {
         if (classList == null || classList.isEmpty()) return true;
@@ -112,6 +116,14 @@ public class Streamproof implements ClientModInitializer {
 
         if (anyClassLoaded(List.of("xaero.hud.minimap.waypoint.render.world.WaypointWorldRenderer"))) {
             StreamproofAPI.add("XAEROS_MINIMAP_WAYPOINTS", "Xaero's Minimap Waypoints", ComponentCategory.Gui, true);
+        }
+
+        if (anyClassLoaded(List.of("ru.berdinskiybear.armorhud.ArmorHudMod"))) {
+            StreamproofAPI.add("UKUS_ARMOR_HUD", "Uku's Armor Hud", ComponentCategory.Gui, true);
+        }
+
+        if (anyClassLoaded(List.of("squeek.appleskin.client.HUDOverlayHandler"))) {
+            StreamproofAPI.add("APPLE_SKIN_OVERLAY", "Apple Skin's Overlay", ComponentCategory.Gui, true);
         }
     }
 

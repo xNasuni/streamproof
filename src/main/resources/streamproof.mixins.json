@@ -25,6 +25,8 @@
     "components.external.InventoryHudOverlay",
     "components.external.XaerosMinimapOverlay",
     "components.external.XaerosWaypointOverlay",
+    "components.external.UkusArmorOverlay",
+    "components.external.AppleSkinOverlay",
     "imgui.GameInputMixin",
     "imgui.GameStartMixin",
     "imgui.GlfwInputMixin",
