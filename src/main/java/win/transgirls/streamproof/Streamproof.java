@@ -5,6 +5,7 @@ import com.sun.jna.ptr.PointerByReference;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.render.state.GuiElementRenderState;
 import net.minecraft.client.option.KeyBinding;
@@ -50,6 +51,8 @@ public class Streamproof implements ClientModInitializer {
             SoundEvent.of(Identifier.of("streamproof", "success"));
     public static final SoundEvent failureSound =
             SoundEvent.of(Identifier.of("streamproof", "failure"));
+
+    public static final boolean immediatelyFastLoaded = FabricLoader.getInstance().isModLoaded("immediatelyfast");
 
     public static final StreamproofSettings settings = new StreamproofSettings();
     public static SwapBufferHook swapBufferHook;

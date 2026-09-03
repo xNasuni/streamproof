@@ -46,6 +46,7 @@ dependencies {
     modCompileOnly files('libs/xaerominimap-fabric-1.21.11-25.3.5.jar')
     modCompileOnly files('libs/ukus-armor-hud-0.10.2+mc1.21.11.jar')
     modCompileOnly files('libs/appleskin-fabric-mc1.21.11-3.0.8.jar')
+    modCompileOnly files('libs/ImmediatelyFast-Fabric-1.14.3+1.21.11.jar')
 
     include(modImplementation("maven.modrinth:crossfabric:0.1.2"))
 
