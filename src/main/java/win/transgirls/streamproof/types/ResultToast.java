@@ -5,10 +5,13 @@ import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.toast.Toast;
 import net.minecraft.client.toast.ToastManager;
+import net.minecraft.text.OrderedText;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.List;
 
 public class ResultToast implements Toast {
     private static final Identifier SUCCESS_TEXTURE =
@@ -53,15 +56,22 @@ public class ResultToast implements Toast {
 
         gfx.drawText(font, Text.literal(this.success ? "Success" : "Failure").fillStyle(Style.EMPTY.withBold(true)), this.success ? 21 : 18, 7, this.success ? 0xFF618E45 : 0xFF8C4444, true);
 
-        int textWidth = font.getWidth(this.text);
-        gfx.drawText(
-                font,
-                this.text,
-                4,
-                20,
-                0xffffffff,
-                true
-        );
+        List<OrderedText> lines = font.wrapLines(this.text, this.getWidth() - 8);
+        for (int i = 0; i < lines.size(); i++) {
+            gfx.drawText(
+                    font,
+                    lines.get(i),
+                    4,
+                    20 + i * font.fontHeight,
+                    0xffffffff,
+                    true
+            );
+        }
+    }
+
+    @Override
+    public float getYPos(int topIndex) {
+        return topIndex * (float) BASE_HEIGHT;
     }
 
     @Override
