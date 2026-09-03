@@ -14,7 +14,11 @@ Streamproof is a fabric windows-only mod that lets you hide specific things from
 | <img src="https://github.githubassets.com/favicons/favicon-dark.svg" width="24px" align="left"> GitHub | [Download](https://github.com/xNasuni/streamproof/releases/latest) |
 
 #### Help
-Not working? **Make sure you are using "Game Capture" and targeting the `javaw` Minecraft process** instead of the "Fullscreen Application" option, or the "Screen Capture" which are both unsupported
+Not working?
+
+**Make sure you are using "Game Capture" with mode "Capture specific window". Leave "Use anti-cheat compatibility hook" unchecked, and target the `javaw` Minecraft window**.
+
+Do not use the "Fullscreen Application" option, or the "Screen Capture" which are both unsupported
 
 If you need help to figure out how to use this, check out the [Wiki](https://github.com/xNasuni/streamproof/wiki)!<br>
 If you want to report a bug or suggest a new feature, make an issue in [Issues](https://github.com/xNasuni/streamproof/issues)!
