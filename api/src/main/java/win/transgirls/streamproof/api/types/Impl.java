@@ -5,6 +5,8 @@ public interface Impl {
 
     boolean isWriting();
 
+    boolean isReady();
+
     boolean isStreamproof(String id);
 
     RenderTarget getRenderTarget(String id);

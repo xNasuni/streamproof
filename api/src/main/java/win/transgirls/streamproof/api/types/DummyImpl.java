@@ -12,6 +12,11 @@ public class DummyImpl implements Impl {
     }
 
     @Override
+    public boolean isReady() {
+        return false;
+    }
+
+    @Override
     public boolean isStreamproof(String id) {
         return false;
     }

@@ -47,6 +47,11 @@ public class StreamproofImpl implements Impl {
     }
 
     @Override
+    public boolean isReady() {
+        return Streamproof.swapBufferHook != null;
+    }
+
+    @Override
     public boolean isStreamproof(String id) {
         return Streamproof.swapBufferHook.hooked && Streamproof.settings.isStreamproof(id);
     }

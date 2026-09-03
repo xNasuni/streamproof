@@ -43,6 +43,10 @@ public final class StreamproofAPI {
         return impl().isWriting();
     }
 
+    public static boolean isReady() {
+        return impl().isReady();
+    }
+
     public static boolean isStreamproof(String id) {
         return impl().isStreamproof(id);
     }
@@ -56,20 +60,36 @@ public final class StreamproofAPI {
     }
 
     public static void begin(String id) {
+        if (!impl().isReady()) {
+            return;
+        }
+
         impl().begin(id);
     }
 
     public static void end(String id) {
+        if (!impl().isReady()) {
+            return;
+        }
+
         impl().end(id);
     }
 
     public static void beginImmediate(String id) {
+        if (!impl().isReady()) {
+            return;
+        }
+
         if (isStreamproof(id)) {
             start(getRenderTarget(id));
         }
     }
 
     public static void endImmediate(String id) {
+        if (!impl().isReady()) {
+            return;
+        }
+
         if (isStreamproof(id)) {
             stop(getRenderTarget(id));
         }
