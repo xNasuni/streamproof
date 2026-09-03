@@ -179,6 +179,10 @@ public class Dashboard extends PanelInterface {
                 LOGGER.error("Streamproof failed to save setting", e);
             }
         }
+
+        if (ImGui.button("Reapply Hook")) {
+            Streamproof.swapBufferHook.reapply();
+        }
     }
 
     public static class Tab {

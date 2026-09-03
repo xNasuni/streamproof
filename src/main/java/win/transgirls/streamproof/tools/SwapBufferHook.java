@@ -119,6 +119,11 @@ public class SwapBufferHook {
         install();
     }
 
+    public void reapply() {
+        if (target == null) return;
+        guardian.execute(this::reclaim);
+    }
+
     public void stop() {
         running = false;
 
