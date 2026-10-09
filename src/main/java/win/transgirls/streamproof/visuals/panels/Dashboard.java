@@ -48,7 +48,7 @@ public class Dashboard extends PanelInterface {
     public void setup() {
         this.tabs.addAll(List.of(new Tab[]{
                 new Tab("Toggles", this::renderToggles, true),
-                new Tab("Extra", this::renderExtras, false)
+                new Tab("Settings", this::renderExtras, false)
         }));
 
         super.setup();
@@ -170,6 +170,16 @@ public class Dashboard extends PanelInterface {
     }
 
     public void renderExtras() {
+        StreamproofComponent enabled = Streamproof.settings.getComponent("STREAMPROOF_ENABLED");
+
+        if (ImGui.checkbox(enabled.label, enabled.isStreamproof)) {
+            try {
+                Streamproof.settings.set(enabled.id, !enabled.isStreamproof);
+            } catch (IOException e) {
+                LOGGER.error("Streamproof failed to save setting", e);
+            }
+        }
+
         StreamproofComponent component = Streamproof.settings.getComponent("STREAMPROOF_IMGUI_WINDOW");
 
         if (ImGui.checkbox(component.label, component.isStreamproof)) {

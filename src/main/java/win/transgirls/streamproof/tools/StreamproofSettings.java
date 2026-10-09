@@ -156,7 +156,11 @@ public class StreamproofSettings {
     }
 
     public boolean isStreamproof(String id) {
-        return this.getComponent(id).isStreamproof;
+        boolean mainEnabled = this.getComponent(id).isStreamproof;
+        if (id.equals("STREAMPROOF_ENABLED")) {
+            return mainEnabled;
+        }
+        return mainEnabled && this.getComponent("STREAMPROOF_ENABLED").isStreamproof;
     }
 
     public StreamproofComponent getComponent(String id) {

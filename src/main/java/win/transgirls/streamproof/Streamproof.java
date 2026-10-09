@@ -105,6 +105,7 @@ public class Streamproof implements ClientModInitializer {
         StreamproofAPI.add("DEBUG_HITBOXES", "Hitboxes", ComponentCategory.World, true);
         StreamproofAPI.add("MAPS", "Maps", ComponentCategory.World, false);
 
+        StreamproofAPI.add("STREAMPROOF_ENABLED", "Enabled", ComponentCategory.Hidden, true);
         StreamproofAPI.add("STREAMPROOF_IMGUI_WINDOW", "ImGui Window", ComponentCategory.Hidden, true);
 
         if (anyClassLoaded(List.of("dlovin.inventoryhud.gui.InventoryHUDGui"))) {
