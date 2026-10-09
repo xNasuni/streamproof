@@ -3,7 +3,6 @@ package win.transgirls.streamproof.tools;
 import com.mojang.blaze3d.opengl.GlStateManager;
 import net.minecraft.client.gui.screen.ChatScreen;
 import net.minecraft.client.gui.screen.GameModeSwitcherScreen;
-import net.minecraft.client.render.BufferBuilder;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.texture.NativeImage;
 import org.lwjgl.opengl.GL11C;
@@ -123,11 +122,6 @@ public class StreamproofImpl implements Impl {
         }
 
         if (consumer instanceof VertexConsumerProvider.Immediate immediate) {
-            BufferBuilder builder = immediate.pending.get(immediate.currentLayer);
-            if (builder == null || !builder.building) {
-                return;
-            }
-
             immediate.draw();
         }
     }
