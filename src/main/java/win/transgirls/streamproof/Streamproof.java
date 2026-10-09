@@ -28,8 +28,8 @@ import win.transgirls.streamproof.input.KeyboardMain;
 import win.transgirls.streamproof.input.MinecraftKeybind;
 import win.transgirls.streamproof.systems.gl.Shader;
 import win.transgirls.streamproof.tools.StreamproofImpl;
-import win.transgirls.streamproof.tools.SwapBufferHook;
 import win.transgirls.streamproof.tools.StreamproofSettings;
+import win.transgirls.streamproof.tools.SwapBufferHook;
 import win.transgirls.streamproof.types.MinHook;
 import win.transgirls.streamproof.visuals.Interface;
 
@@ -43,7 +43,7 @@ public class Streamproof implements ClientModInitializer {
     @SuppressWarnings("unused")
     // never change this or die (streamproof api reflection uses it)
     public static Impl _global_impl = new StreamproofImpl();
-
+    
     public static final String id = "streamproof";
     public static final Logger LOGGER = LogManager.getLogger("Streamproof");
 
@@ -106,6 +106,7 @@ public class Streamproof implements ClientModInitializer {
         StreamproofAPI.add("MAPS", "Maps", ComponentCategory.World, false);
 
         StreamproofAPI.add("STREAMPROOF_ENABLED", "Enabled", ComponentCategory.Hidden, true);
+        StreamproofAPI.add("STREAMPROOF_SCREENSHOTS", "Streamproof Screenshots", ComponentCategory.Hidden, true);
         StreamproofAPI.add("STREAMPROOF_IMGUI_WINDOW", "ImGui Window", ComponentCategory.Hidden, true);
 
         if (anyClassLoaded(List.of("dlovin.inventoryhud.gui.InventoryHUDGui"))) {

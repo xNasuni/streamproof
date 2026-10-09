@@ -180,6 +180,16 @@ public class Dashboard extends PanelInterface {
             }
         }
 
+        StreamproofComponent screenshots = Streamproof.settings.getComponent("STREAMPROOF_SCREENSHOTS");
+
+        if (ImGui.checkbox(screenshots.label, screenshots.isStreamproof)) {
+            try {
+                Streamproof.settings.set(screenshots.id, !screenshots.isStreamproof);
+            } catch (IOException e) {
+                LOGGER.error("Streamproof failed to save setting", e);
+            }
+        }
+
         StreamproofComponent component = Streamproof.settings.getComponent("STREAMPROOF_IMGUI_WINDOW");
 
         if (ImGui.checkbox(component.label, component.isStreamproof)) {

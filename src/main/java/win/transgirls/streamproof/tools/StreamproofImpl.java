@@ -5,7 +5,10 @@ import net.minecraft.client.gui.screen.ChatScreen;
 import net.minecraft.client.gui.screen.GameModeSwitcherScreen;
 import net.minecraft.client.render.BufferBuilder;
 import net.minecraft.client.render.VertexConsumerProvider;
+import net.minecraft.client.texture.NativeImage;
 import org.lwjgl.opengl.GL11C;
+import org.lwjgl.opengl.GL30C;
+import org.lwjgl.system.MemoryUtil;
 import win.transgirls.streamproof.Streamproof;
 import win.transgirls.streamproof.api.types.ComponentCategory;
 import win.transgirls.streamproof.api.types.Impl;
@@ -15,6 +18,11 @@ import win.transgirls.streamproof.systems.gl.GL;
 import win.transgirls.streamproof.systems.gl.Shader;
 import win.transgirls.streamproof.systems.gl.StreamproofFramebuffer;
 
+import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Consumer;
+
 import static win.transgirls.streamproof.Streamproof.LOGGER;
 import static win.transgirls.streamproof.Streamproof.mc;
 
@@ -23,6 +31,8 @@ public class StreamproofImpl implements Impl {
     public StreamproofFramebuffer guiFb;
     public boolean writing;
     public Shader overlay;
+
+    public ArrayList<Consumer<NativeImage>> screenshotRunners = new ArrayList<>();
 
     public StreamproofImpl() {
         this.writing = false;
@@ -160,6 +170,21 @@ public class StreamproofImpl implements Impl {
 
                     GL.restoreRenderFlags();
                 }
+
+                if (!screenshotRunners.isEmpty()) {
+                    List<Consumer<NativeImage>> runners = new ArrayList<>(screenshotRunners);
+                    screenshotRunners.clear();
+
+                    captureImage(image -> {
+                        for (Consumer<NativeImage> runner : runners) {
+                            try {
+                                runner.accept(image);
+                            } catch (Throwable e) {
+                                LOGGER.error(e);
+                            }
+                        }
+                    });
+                }
             }
         } catch (Throwable e) {
             LOGGER.error("Streamproof failed to bind overlay", e);
@@ -171,6 +196,33 @@ public class StreamproofImpl implements Impl {
             }
         } catch (Throwable e) {
             LOGGER.error("Streamproof failed to render imgui", e);
+        }
+    }
+
+    public static void captureImage(Consumer<NativeImage> callback) {
+        int width = mc.getWindow().getFramebufferWidth();
+        int height = mc.getWindow().getFramebufferHeight();
+        int previousRead = GL.getInteger(GL30C.GL_READ_FRAMEBUFFER_BINDING);
+        int previousAlignment = GL.getInteger(GL11C.GL_PACK_ALIGNMENT);
+        ByteBuffer pixels = MemoryUtil.memAlloc(width * height * 4);
+
+        try {
+            GL.bindFrameBuffer(GL30C.GL_READ_FRAMEBUFFER, 0);
+            GL.pixelStorei(GL11C.GL_PACK_ALIGNMENT, 1);
+            GL.readPixels(0, 0, width, height, GL11C.GL_RGBA, GL11C.GL_UNSIGNED_BYTE, pixels);
+
+            NativeImage image = new NativeImage(width, height, false);
+            for (int y = 0; y < height; y++) {
+                for (int x = 0; x < width; x++) {
+                    image.setColor(x, height - y - 1, pixels.getInt((x + y * width) * 4) | 0xFF000000);
+                }
+            }
+
+            callback.accept(image);
+        } finally {
+            GL.pixelStorei(GL11C.GL_PACK_ALIGNMENT, previousAlignment);
+            GL.bindFrameBuffer(GL30C.GL_READ_FRAMEBUFFER, previousRead);
+            MemoryUtil.memFree(pixels);
         }
     }
 }

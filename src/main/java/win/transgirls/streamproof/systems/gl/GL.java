@@ -357,4 +357,16 @@ public class GL {
     public static void clearColorBuffer() {
         GlStateManager._clear(GL11C.GL_COLOR_BUFFER_BIT);
     }
+
+    public static int getInteger(int pname) {
+        return GL11C.glGetInteger(pname);
+    }
+
+    public static void pixelStorei(int pname, int param) {
+        GL11C.glPixelStorei(pname, param);
+    }
+
+    public static void readPixels(int x, int y, int width, int height, int format, int type, ByteBuffer pixels) {
+        GL11C.glReadPixels(x, y, width, height, format, type, pixels);
+    }
 }
