@@ -18,6 +18,9 @@ public class DebugHitboxes {
         boolean isStreamproof = StreamproofAPI.isReady() && StreamproofAPI.isStreamproof("DEBUG_HITBOXES");
 
         if (isStreamproof) {
+            if (StreamproofAPI.getImpl() instanceof StreamproofImpl impl) {
+                impl.forceDraw(vertexConsumers);
+            }
             StreamproofAPI.start(StreamproofAPI.getRenderTarget("DEBUG_HITBOXES"));
         }
 
