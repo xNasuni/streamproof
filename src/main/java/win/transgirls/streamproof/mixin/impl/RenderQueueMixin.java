@@ -1,16 +1,16 @@
 package win.transgirls.streamproof.mixin.impl;
 
-import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.command.BatchingRenderCommandQueue;
-import net.minecraft.client.render.command.CustomCommandRenderer;
-import net.minecraft.client.render.command.OrderedRenderCommandQueue;
-import net.minecraft.client.render.command.OrderedRenderCommandQueueImpl;
-import net.minecraft.client.render.item.ItemRenderState;
-import net.minecraft.client.render.model.BakedQuad;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.item.ItemDisplayContext;
-import net.minecraft.text.OrderedText;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.renderer.SubmitNodeCollection;
+import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.SubmitNodeStorage;
+import net.minecraft.client.renderer.feature.CustomFeatureRenderer;
+import net.minecraft.client.renderer.item.ItemStackRenderState;
+import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.client.resources.model.geometry.BakedQuad;
+import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.world.item.ItemDisplayContext;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -22,46 +22,50 @@ import win.transgirls.streamproof.api.StreamproofAPI;
 
 import java.util.List;
 
-@Mixin(BatchingRenderCommandQueue.class)
+@Mixin(SubmitNodeCollection.class)
 public class RenderQueueMixin {
     @Shadow
     @Final
-    private List<OrderedRenderCommandQueueImpl.TextCommand> textCommands;
+    private List<SubmitNodeStorage.TextSubmit> textSubmits;
 
     @Shadow
     @Final
-    private List<OrderedRenderCommandQueueImpl.ItemCommand> itemCommands;
+    private List<SubmitNodeStorage.ItemSubmit> itemSubmits;
 
     @Shadow
     @Final
-    private CustomCommandRenderer.Commands customCommands;
+    private CustomFeatureRenderer.Storage customGeometrySubmits;
 
     @Inject(method = "submitText", at = @At("TAIL"))
-    private void wrapSubmitText(MatrixStack matrices, float x, float y, OrderedText text, boolean dropShadow, TextRenderer.TextLayerType layerType, int light, int color, int backgroundColor, int outlineColor, CallbackInfo ci) {
+    private void wrapSubmitText(PoseStack poseStack, float x, float y, FormattedCharSequence text, boolean dropShadow, Font.DisplayMode displayMode, int lightCoords, int color, int backgroundColor, int outlineColor, CallbackInfo ci) {
         if (StreamproofAPI.isWriting()) {
-            Streamproof.renderCommands.add(this.textCommands.getLast());
+            Streamproof.renderCommands.add(this.textSubmits.getLast());
         }
     }
 
     @Inject(method = "submitItem", at = @At("TAIL"))
-    private void wrapSubmitItem(MatrixStack matrices, ItemDisplayContext displayContext, int light, int overlay, int outlineColors, int[] tintLayers, List<BakedQuad> quads, RenderLayer renderLayer, ItemRenderState.Glint glintType, CallbackInfo ci) {
+    private void wrapSubmitItem(PoseStack poseStack, ItemDisplayContext displayContext, int lightCoords, int overlayCoords, int outlineColor, int[] tintLayers, List<BakedQuad> quads, ItemStackRenderState.FoilType foilType, CallbackInfo ci) {
         if (StreamproofAPI.isWriting()) {
-            Streamproof.renderCommands.add(this.itemCommands.getLast());
+            Streamproof.renderCommands.add(this.itemSubmits.getLast());
         }
     }
 
-    @Inject(method = "submitCustom(Lnet/minecraft/client/render/command/OrderedRenderCommandQueue$LayeredCustom;)V", at = @At(value = "INVOKE", target = "Ljava/util/List;add(Ljava/lang/Object;)Z"))
-    private void wrapSubmitLayeredCustom(OrderedRenderCommandQueue.LayeredCustom customRenderer, CallbackInfo ci) {
+    @Inject(method = "submitParticleGroup(Lnet/minecraft/client/renderer/SubmitNodeCollector$ParticleGroupRenderer;)V", at = @At(value = "INVOKE", target = "Ljava/util/List;add(Ljava/lang/Object;)Z"))
+    private void wrapSubmitLayeredCustom(SubmitNodeCollector.ParticleGroupRenderer particleGroupRenderer, CallbackInfo ci) {
         if (StreamproofAPI.isWriting()) {
-            Streamproof.renderCommands.add(customRenderer);
+            Streamproof.renderCommands.add(particleGroupRenderer);
         }
     }
 
-    @Inject(method = "submitCustom(Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/RenderLayer;Lnet/minecraft/client/render/command/OrderedRenderCommandQueue$Custom;)V", at = @At(value = "TAIL"))
-    private void wrapSubmitCustom(MatrixStack matrices, RenderLayer renderLayer, OrderedRenderCommandQueue.Custom customRenderer, CallbackInfo ci) {
+    @Inject(method = "submitCustomGeometry(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/rendertype/RenderType;Lnet/minecraft/client/renderer/SubmitNodeCollector$CustomGeometryRenderer;)V", at = @At(value = "TAIL"))
+    private void wrapSubmitCustom(PoseStack poseStack, RenderType renderType, SubmitNodeCollector.CustomGeometryRenderer customGeometryRenderer, CallbackInfo ci) {
         if (StreamproofAPI.isWriting()) {
             try {
-                Streamproof.renderCommands.add(this.customCommands.customCommands.get(renderLayer).getLast());
+                if (!renderType.hasBlending()) {
+                    Streamproof.renderCommands.add(this.customGeometrySubmits.solidCustomGeometrySubmits.get(renderType).getLast());
+                } else {
+                    Streamproof.renderCommands.add(this.customGeometrySubmits.translucentCustomGeometrySubmits.get(renderType).getLast());
+                }
             } catch (Throwable ignored) {
             }
         }

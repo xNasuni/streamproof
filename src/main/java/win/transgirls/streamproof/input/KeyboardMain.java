@@ -1,8 +1,5 @@
 package win.transgirls.streamproof.input;
 
-
-import net.minecraft.client.option.KeyBinding;
-
 import java.util.ArrayList;
 
 public class KeyboardMain {

@@ -1,10 +1,7 @@
 package win.transgirls.streamproof.tools;
 
 import com.mojang.blaze3d.opengl.GlStateManager;
-import net.minecraft.client.gui.screen.ChatScreen;
-import net.minecraft.client.gui.screen.GameModeSwitcherScreen;
-import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.texture.NativeImage;
+import com.mojang.blaze3d.platform.NativeImage;
 import org.lwjgl.opengl.GL11C;
 import org.lwjgl.opengl.GL30C;
 import org.lwjgl.system.MemoryUtil;
@@ -21,6 +18,9 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
+import net.minecraft.client.gui.screens.ChatScreen;
+import net.minecraft.client.gui.screens.debug.GameModeSwitcherScreen;
+import net.minecraft.client.renderer.MultiBufferSource;
 
 import static win.transgirls.streamproof.Streamproof.LOGGER;
 import static win.transgirls.streamproof.Streamproof.mc;
@@ -116,20 +116,20 @@ public class StreamproofImpl implements Impl {
         }
     }
 
-    public void forceDraw(VertexConsumerProvider consumer) {
+    public void forceDraw(MultiBufferSource consumer) {
         if (Streamproof.immediatelyFastLoaded && ImmediatelyFastCompat.forceDraw(consumer)) {
             return;
         }
 
-        if (consumer instanceof VertexConsumerProvider.Immediate immediate) {
-            immediate.draw();
+        if (consumer instanceof MultiBufferSource.BufferSource immediate) {
+            immediate.endBatch();
         }
     }
 
     public void composite() {
         try {
             if (this.overlay != null) {
-                if (mc.currentScreen == null || mc.currentScreen instanceof ChatScreen || mc.currentScreen instanceof GameModeSwitcherScreen) {
+                if (mc.screen == null || mc.screen instanceof ChatScreen || mc.screen instanceof GameModeSwitcherScreen) {
                     GL.saveRenderFlags();
 
                     if (this.worldFb.colorTexture != -1) {
@@ -194,8 +194,8 @@ public class StreamproofImpl implements Impl {
     }
 
     public static void captureImage(Consumer<NativeImage> callback) {
-        int width = mc.getWindow().getFramebufferWidth();
-        int height = mc.getWindow().getFramebufferHeight();
+        int width = mc.getWindow().getWidth();
+        int height = mc.getWindow().getHeight();
         int previousRead = GL.getInteger(GL30C.GL_READ_FRAMEBUFFER_BINDING);
         int previousAlignment = GL.getInteger(GL11C.GL_PACK_ALIGNMENT);
         ByteBuffer pixels = MemoryUtil.memAlloc(width * height * 4);
@@ -208,7 +208,7 @@ public class StreamproofImpl implements Impl {
             NativeImage image = new NativeImage(width, height, false);
             for (int y = 0; y < height; y++) {
                 for (int x = 0; x < width; x++) {
-                    image.setColor(x, height - y - 1, pixels.getInt((x + y * width) * 4) | 0xFF000000);
+                    image.setPixelABGR(x, height - y - 1, pixels.getInt((x + y * width) * 4) | 0xFF000000);
                 }
             }
 

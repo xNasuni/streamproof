@@ -26,8 +26,8 @@ public class StreamproofFramebuffer {
     }
 
     public void fit() {
-        int targetWidth = mc.getFramebuffer().textureWidth;
-        int targetHeight = mc.getFramebuffer().textureHeight;
+        int targetWidth = mc.getMainRenderTarget().width;
+        int targetHeight = mc.getMainRenderTarget().height;
 
         if (targetWidth != this.width || targetHeight != this.height || fbo == -1) {
             this.reinit(targetWidth, targetHeight);

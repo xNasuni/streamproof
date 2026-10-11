@@ -1,5 +1,5 @@
 plugins {
-    id 'net.fabricmc.fabric-loom-remap' version "${loom_version}"
+    id 'net.fabricmc.fabric-loom' version "${loom_version}"
     id 'maven-publish'
 }
 
@@ -24,11 +24,11 @@ repositories {
 
 dependencies {
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
-    mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
-    modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
-    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
-    modImplementation "com.terraformersmc:modmenu:${project.mod_menu_version}"
+    implementation "net.fabricmc:fabric-loader:${project.loader_version}"
+
+    implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+    implementation "com.terraformersmc:modmenu:${project.mod_menu_version}"
 
     implementation "net.java.dev.jna:jna:5.14.0"
     implementation "net.java.dev.jna:jna-platform:5.14.0"
@@ -42,19 +42,22 @@ dependencies {
     implementation "io.github.spair:imgui-java-natives-windows:${project.imguiVersion}"
     include "io.github.spair:imgui-java-natives-windows:${project.imguiVersion}"
 
-    modCompileOnly files('libs/inventoryhud.fabric.1.21.11-3.4.29.jar')
-    modCompileOnly files('libs/xaerominimap-fabric-1.21.11-25.3.5.jar')
-    modCompileOnly files('libs/ukus-armor-hud-0.10.2+mc1.21.11.jar')
-    modCompileOnly files('libs/appleskin-fabric-mc1.21.11-3.0.8.jar')
-    modCompileOnly files('libs/ImmediatelyFast-Fabric-1.14.3+1.21.11.jar')
+    compileOnly files('libs/inventoryhud.fabric.26.1.2-3.4.31.jar')
+    compileOnly files('libs/xaerominimap-fabric-26.1.2-26.6.0.jar')
+    compileOnly files('libs/ukus-armor-hud-fabric-0.11.0+mc26.1.jar')
+    compileOnly files('libs/appleskin-fabric-mc26.1.2-3.0.10.jar')
+    compileOnly files('libs/ImmediatelyFast-Fabric-1.15.3+26.1.jar')
 
-    include(modImplementation("maven.modrinth:crossfabric:0.1.2"))
+    include(implementation("maven.modrinth:crossfabric:0.1.2"))
 
     include(implementation project(':api'))
 }
 
 loom {
     accessWidenerPath = file('src/main/resources/streamproof.aw')
+    runConfigs.configureEach {
+        property "fabric.remapClasspathFile", "${project.buildDir}/loom-cache/remapClasspath.txt"
+    }
 }
 
 processResources {
@@ -72,14 +75,14 @@ processResources {
 }
 
 tasks.withType(JavaCompile).configureEach {
-    it.options.release = 21
+    it.options.release = 25
 }
 
 java {
     withSourcesJar()
 
-    sourceCompatibility = JavaVersion.VERSION_21
-    targetCompatibility = JavaVersion.VERSION_21
+    sourceCompatibility = JavaVersion.VERSION_25
+    targetCompatibility = JavaVersion.VERSION_25
 }
 
 jar {
@@ -99,33 +102,5 @@ publishing {
     }
 
     repositories {
-    }
-}
-
-tasks.named('remapJar') {
-    doLast {
-        if (!project.hasProperty("deployToMinecraft")) {
-            return
-        }
-
-        def modsDir = project.property("minecraftModsDir")
-        def naming = "${project.archives_base_name}-${project.version}.jar"
-        def sourceFile = file("${buildDir}/libs/${naming}")
-        def destinationDir = file(modsDir)
-
-        if (sourceFile.exists()) {
-            copy {
-                from sourceFile
-                into destinationDir
-            }
-
-            def execOps = project.services.get(ExecOperations)
-            execOps.exec {
-                commandLine 'powershell', '-Command', '[Console]::Beep(2500, 200)'
-                ignoreExitValue = true
-            }
-
-            println "deployed ${naming}"
-        }
     }
 }

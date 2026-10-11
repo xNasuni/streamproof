@@ -47,7 +47,7 @@ public class ImGuiImplementation {
 
         ImGuiIO io = ImGui.getIO();
         if (mc != null && mc.getWindow() != null) {
-            io.setDisplaySize(mc.getWindow().getFramebufferWidth(), mc.getWindow().getFramebufferHeight());
+            io.setDisplaySize(mc.getWindow().getWidth(), mc.getWindow().getHeight());
             io.setDisplayFramebufferScale(1.0f, 1.0f);
         }
 

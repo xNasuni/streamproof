@@ -1,20 +1,19 @@
 package win.transgirls.streamproof.mixin.components.base;
 
-
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.hud.InGameHud;
-import net.minecraft.scoreboard.ScoreboardObjective;
+import net.minecraft.client.gui.Gui;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.world.scores.Objective;
 import org.spongepowered.asm.mixin.Mixin;
 import win.transgirls.streamproof.api.StreamproofAPI;
 
-@Mixin(InGameHud.class)
+@Mixin(Gui.class)
 public class ScoreboardOverlay {
-    @WrapMethod(method = "renderScoreboardSidebar(Lnet/minecraft/client/gui/DrawContext;Lnet/minecraft/scoreboard/ScoreboardObjective;)V")
-    private void wrapRenderScoreboard(DrawContext context, ScoreboardObjective objective, Operation<Void> original) {
+    @WrapMethod(method = "displayScoreboardSidebar")
+    private void wrapRenderScoreboard(GuiGraphicsExtractor graphics, Objective objective, Operation<Void> original) {
         StreamproofAPI.begin("SCOREBOARD");
-        original.call(context, objective);
+        original.call(graphics, objective);
         StreamproofAPI.end("SCOREBOARD");
     }
 }

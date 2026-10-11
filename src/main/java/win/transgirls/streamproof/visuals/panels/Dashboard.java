@@ -1,6 +1,5 @@
 package win.transgirls.streamproof.visuals.panels;
 
-
 import imgui.ImDrawList;
 import imgui.ImGui;
 import imgui.ImGuiIO;
@@ -27,7 +26,7 @@ import static win.transgirls.streamproof.visuals.Color.rgba;
 public class Dashboard extends PanelInterface {
     private final List<Tab> tabs = new ArrayList<>();
 
-    public static void graySeperator() {
+    public static void graySeparator() {
         ImGui.dummy(0, 1);
 
         ImVec2 start = ImGui.getCursorScreenPos();
@@ -77,12 +76,12 @@ public class Dashboard extends PanelInterface {
         ImGui.popFont();
         ImGui.pushFont(Style.getFont(16));
         ImGui.setCursorPosY(ImGui.getCursorPosY() - 4f);
-        ImGui.textColored(Color.GRAY.toInt(), String.format("%s <3", SharedConstants.getGameVersion().id()));
+        ImGui.textColored(Color.GRAY.toInt(), String.format("%s <3", SharedConstants.getCurrentVersion().id()));
         ImGui.popFont();
         ImGui.endGroup();
 
         ImGui.setCursorPosY(ImGui.getCursorPosY() - 4f);
-        graySeperator();
+        graySeparator();
 
         ImGui.pushFont(Style.getFont(18));
 

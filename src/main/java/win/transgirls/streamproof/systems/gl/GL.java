@@ -166,10 +166,10 @@ public class GL {
     }
 
     public static void saveRenderFlags() {
-        lastBlend = GlStateManager.BLEND.capState.state;
-        lastCullFace = GlStateManager.CULL.capState.state;
-        lastDepthTest = GlStateManager.DEPTH.capState.state;
-        lastScissorTest = GlStateManager.SCISSOR.capState.state;
+        lastBlend = GlStateManager.BLEND.mode.enabled;
+        lastCullFace = GlStateManager.CULL.enable.enabled;
+        lastDepthTest = GlStateManager.DEPTH.mode.enabled;
+        lastScissorTest = GlStateManager.SCISSOR.mode.enabled;
     }
 
     public static void restoreRenderFlags() {

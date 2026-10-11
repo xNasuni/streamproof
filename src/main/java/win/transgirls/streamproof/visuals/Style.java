@@ -1,6 +1,5 @@
 package win.transgirls.streamproof.visuals;
 
-
 import imgui.ImFont;
 import imgui.ImFontConfig;
 import imgui.ImGui;

@@ -1,24 +1,22 @@
 package win.transgirls.streamproof;
 
+import com.mojang.blaze3d.platform.InputConstants;
+import com.mojang.blaze3d.platform.Window;
 import com.sun.jna.Native;
 import com.sun.jna.ptr.PointerByReference;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
-import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.render.state.GuiElementRenderState;
-import net.minecraft.client.option.KeyBinding;
-import net.minecraft.client.util.InputUtil;
-import net.minecraft.client.util.Window;
-import net.minecraft.sound.SoundEvent;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.profiler.Profiler;
+import net.minecraft.client.KeyMapping;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.state.gui.ScreenArea;
+import net.minecraft.resources.Identifier;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.util.profiling.ProfilerFiller;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.lwjgl.glfw.GLFW;
-import win.transgirls.crossfabric.multiversion.VersionedKeybind;
-import win.transgirls.crossfabric.multiversion.VersionedKeybindCategory;
 import win.transgirls.streamproof.api.StreamproofAPI;
 import win.transgirls.streamproof.api.types.ComponentCategory;
 import win.transgirls.streamproof.api.types.Impl;
@@ -43,14 +41,14 @@ public class Streamproof implements ClientModInitializer {
     @SuppressWarnings("unused")
     // never change this or die (streamproof api reflection uses it)
     public static Impl _global_impl = new StreamproofImpl();
-    
+
     public static final String id = "streamproof";
     public static final Logger LOGGER = LogManager.getLogger("Streamproof");
 
     public static final SoundEvent successSound =
-            SoundEvent.of(Identifier.of("streamproof", "success"));
+            SoundEvent.createVariableRangeEvent(Identifier.fromNamespaceAndPath("streamproof", "success"));
     public static final SoundEvent failureSound =
-            SoundEvent.of(Identifier.of("streamproof", "failure"));
+            SoundEvent.createVariableRangeEvent(Identifier.fromNamespaceAndPath("streamproof", "failure"));
 
     public static final boolean immediatelyFastLoaded = FabricLoader.getInstance().isModLoaded("immediatelyfast");
 
@@ -58,16 +56,16 @@ public class Streamproof implements ClientModInitializer {
     public static SwapBufferHook swapBufferHook;
     public static PointerByReference wglSwapBuffersObs;
     public static MinHook minhook = null;
-    public static MinecraftClient mc;
+    public static Minecraft mc;
     public static Window window;
 
-    public static Set<GuiElementRenderState> renderStates = new HashSet<>();
+    public static Set<ScreenArea> renderStates = new HashSet<>();
     public static Set<Object> renderCommands = new HashSet<>();
     public static Shader overlayShader;
-    private static final Map<Profiler, List<String>> STACKS = new WeakHashMap<>();
+    private static final Map<ProfilerFiller, List<String>> STACKS = new WeakHashMap<>();
 
-    public static List<String> stackFor(Profiler profiler) {
-        return STACKS.computeIfAbsent(profiler, p -> new ArrayList<>());
+    public static List<String> stackFor(ProfilerFiller profiler) {
+        return STACKS.computeIfAbsent(profiler, _ -> new ArrayList<>());
     }
 
     private static boolean anyClassLoaded(List<String> classList) {
@@ -85,7 +83,7 @@ public class Streamproof implements ClientModInitializer {
     }
 
     public static void lateInit() {
-        ImGuiImplementation.create(window.getHandle());
+        ImGuiImplementation.create(window.handle());
         Interface.init();
 
         Streamproof.swapBufferHook = new SwapBufferHook();
@@ -109,7 +107,7 @@ public class Streamproof implements ClientModInitializer {
         StreamproofAPI.add("STREAMPROOF_SCREENSHOTS", "Streamproof Screenshots", ComponentCategory.Hidden, true);
         StreamproofAPI.add("STREAMPROOF_IMGUI_WINDOW", "ImGui Window", ComponentCategory.Hidden, true);
 
-        if (anyClassLoaded(List.of("dlovin.inventoryhud.gui.InventoryHUDGui"))) {
+        if (anyClassLoaded(List.of("dlovin.inventoryhud.gui.InventoryGui"))) {
             StreamproofAPI.add("INVENTORY_HUD_ARMOR", "Inventory Hud Armor", ComponentCategory.Gui, true);
             StreamproofAPI.add("INVENTORY_HUD_POTION", "Inventory Hud Potions", ComponentCategory.Gui, true);
             StreamproofAPI.add("INVENTORY_HUD_INVENTORY", "Inventory Hud Inventory", ComponentCategory.Gui, true);
@@ -169,26 +167,27 @@ public class Streamproof implements ClientModInitializer {
             throw new RuntimeException("MinHook failed to initialize");
         }
 
-        VersionedKeybindCategory main = new VersionedKeybindCategory("streamproof", "main");
+        KeyMapping.Category main = KeyMapping.Category.register(Identifier.fromNamespaceAndPath("streamproof", "main"));
 
-        KeyBinding toggleConfig = VersionedKeybind.create(
-                "key.streamproof.config",
-                InputUtil.Type.KEYSYM,
-                GLFW.GLFW_KEY_RIGHT_SHIFT,
-                main
+        KeyMapping toggleConfig = KeyMappingHelper.registerKeyMapping(
+                new KeyMapping(
+                        "key.streamproof.config",
+                        InputConstants.Type.KEYSYM,
+                        GLFW.GLFW_KEY_RIGHT_SHIFT,
+                        main
+                )
         );
 
-        KeyBinding closeConfig = VersionedKeybind.create(
-                "key.streamproof.close",
-                InputUtil.Type.KEYSYM,
-                GLFW.GLFW_KEY_ESCAPE,
-                main
+        KeyMapping closeConfig = KeyMappingHelper.registerKeyMapping(
+                new KeyMapping(
+                        "key.streamproof.close",
+                        InputConstants.Type.KEYSYM,
+                        GLFW.GLFW_KEY_ESCAPE,
+                        main
+                )
         );
 
-        KeyBindingHelper.registerKeyBinding(toggleConfig);
-        KeyBindingHelper.registerKeyBinding(closeConfig);
-
-        Streamproof.mc = MinecraftClient.getInstance();
+        Streamproof.mc = Minecraft.getInstance();
         LOGGER.info("Streamproof loaded successfully ;3");
 
         KeyboardMain.on(new MinecraftKeybind(toggleConfig, (action) -> {
@@ -203,7 +202,7 @@ public class Streamproof implements ClientModInitializer {
             }
         }));
 
-        ClientLifecycleEvents.CLIENT_STOPPING.register(client -> {
+        ClientLifecycleEvents.CLIENT_STOPPING.register(_ -> {
             Streamproof.swapBufferHook.stop();
             Streamproof.settings.stop();
         });

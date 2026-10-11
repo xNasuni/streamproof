@@ -3,8 +3,6 @@ package win.transgirls.streamproof.tools;
 import com.sun.jna.Function;
 import com.sun.jna.Pointer;
 import com.sun.jna.ptr.PointerByReference;
-import net.minecraft.client.sound.PositionedSoundInstance;
-import net.minecraft.text.Text;
 import win.transgirls.streamproof.Streamproof;
 import win.transgirls.streamproof.api.StreamproofAPI;
 import win.transgirls.streamproof.types.Kernel32;
@@ -16,6 +14,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.network.chat.Component;
 
 import static win.transgirls.streamproof.Streamproof.mc;
 import static win.transgirls.streamproof.Streamproof.LOGGER;
@@ -94,8 +94,8 @@ public class SwapBufferHook {
                 : "Streamproof failed to hook wglSwapBuffers";
 
         mc.execute(() -> {
-            mc.getSoundManager().play(PositionedSoundInstance.ui(success ? Streamproof.successSound : Streamproof.failureSound, 1.0f));
-            mc.getToastManager().add(new ResultToast(Text.literal(message), success));
+            mc.getSoundManager().play(SimpleSoundInstance.forUI(success ? Streamproof.successSound : Streamproof.failureSound, 1.0f));
+            mc.getToastManager().addToast(new ResultToast(Component.literal(message), success));
         });
     }
 

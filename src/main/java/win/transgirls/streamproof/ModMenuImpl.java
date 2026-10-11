@@ -2,10 +2,11 @@ package win.transgirls.streamproof;
 
 import com.terraformersmc.modmenu.api.ConfigScreenFactory;
 import com.terraformersmc.modmenu.api.ModMenuApi;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.text.Text;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 import win.transgirls.streamproof.visuals.Interface;
 
 import java.util.function.Consumer;
@@ -31,22 +32,22 @@ public class ModMenuImpl implements ModMenuApi {
         private final Screen parent;
 
         protected ImGuiScreen(Screen parent) {
-            super(Text.of("Streamproof"));
+            super(Component.nullToEmpty("Streamproof"));
 
             this.parent = parent;
         }
 
         @Override
-        public void render(DrawContext context, int mouseX, int mouseY, float deltaTicks) {
-            super.render(context, mouseX, mouseY, deltaTicks);
-
+        public void extractRenderState(@NonNull GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
+            super.extractRenderState(graphics, mouseX, mouseY, a);
+            
             if (!Interface.visible) {
-                this.close();
+                this.onClose();
             }
         }
 
         @Override
-        public void close() {
+        public void onClose() {
             mc.setScreen(this.parent);
         }
     }

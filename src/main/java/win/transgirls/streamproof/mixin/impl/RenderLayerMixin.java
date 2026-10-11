@@ -2,59 +2,59 @@ package win.transgirls.streamproof.mixin.impl;
 
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
-import net.minecraft.client.gui.render.state.GuiRenderState;
-import net.minecraft.client.gui.render.state.ItemGuiElementRenderState;
-import net.minecraft.client.gui.render.state.SimpleGuiElementRenderState;
-import net.minecraft.client.gui.render.state.TextGuiElementRenderState;
-import net.minecraft.client.gui.render.state.special.SpecialGuiElementRenderState;
+import net.minecraft.client.renderer.state.gui.GuiElementRenderState;
+import net.minecraft.client.renderer.state.gui.GuiItemRenderState;
+import net.minecraft.client.renderer.state.gui.GuiRenderState;
+import net.minecraft.client.renderer.state.gui.GuiTextRenderState;
+import net.minecraft.client.renderer.state.gui.pip.PictureInPictureRenderState;
 import org.spongepowered.asm.mixin.Mixin;
 import win.transgirls.streamproof.Streamproof;
 import win.transgirls.streamproof.api.StreamproofAPI;
 
-@Mixin(GuiRenderState.Layer.class)
+@Mixin(GuiRenderState.Node.class)
 public class RenderLayerMixin {
     @WrapMethod(method = "addItem")
-    private void wrapAddItem(ItemGuiElementRenderState state, Operation<Void> original) {
+    private void wrapAddItem(GuiItemRenderState itemState, Operation<Void> original) {
         if (StreamproofAPI.isWriting()) {
-            Streamproof.renderStates.add(state);
+            Streamproof.renderStates.add(itemState);
         }
 
-        original.call(state);
+        original.call(itemState);
     }
 
     @WrapMethod(method = "addText")
-    private void wrapAddText(TextGuiElementRenderState state, Operation<Void> original) {
+    private void wrapAddText(GuiTextRenderState textState, Operation<Void> original) {
         if (StreamproofAPI.isWriting()) {
-            Streamproof.renderStates.add(state);
+            Streamproof.renderStates.add(textState);
         }
 
-        original.call(state);
+        original.call(textState);
     }
 
-    @WrapMethod(method = "addSpecialElement")
-    private void wrapAddSpecialElement(SpecialGuiElementRenderState state, Operation<Void> original) {
+    @WrapMethod(method = "addPicturesInPictureState")
+    private void wrapAddSpecialElement(PictureInPictureRenderState picturesInPictureState, Operation<Void> original) {
         if (StreamproofAPI.isWriting()) {
-            Streamproof.renderStates.add(state);
+            Streamproof.renderStates.add(picturesInPictureState);
         }
 
-        original.call(state);
+        original.call(picturesInPictureState);
     }
 
-    @WrapMethod(method = "addSimpleElement")
-    private void wrapAddSimpleElement(SimpleGuiElementRenderState state, Operation<Void> original) {
+    @WrapMethod(method = "addGuiElement")
+    private void wrapAddSimpleElement(GuiElementRenderState blitState, Operation<Void> original) {
         if (StreamproofAPI.isWriting()) {
-            Streamproof.renderStates.add(state);
+            Streamproof.renderStates.add(blitState);
         }
 
-        original.call(state);
+        original.call(blitState);
     }
 
-    @WrapMethod(method = "addPreparedText")
-    private void wrapAddPreparedText(SimpleGuiElementRenderState state, Operation<Void> original) {
+    @WrapMethod(method = "addGlyph")
+    private void wrapAddPreparedText(GuiElementRenderState glyphState, Operation<Void> original) {
         if (StreamproofAPI.isWriting()) {
-            Streamproof.renderStates.add(state);
+            Streamproof.renderStates.add(glyphState);
         }
 
-        original.call(state);
+        original.call(glyphState);
     }
 }

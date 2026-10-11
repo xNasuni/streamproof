@@ -1,12 +1,12 @@
 package win.transgirls.streamproof.tools;
 
-import net.minecraft.client.render.VertexConsumerProvider;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.raphimc.immediatelyfast.feature.core.BatchableBufferSource;
 
 public final class ImmediatelyFastCompat {
-    public static boolean forceDraw(VertexConsumerProvider consumer) {
+    public static boolean forceDraw(MultiBufferSource consumer) {
         if (consumer instanceof BatchableBufferSource batchable) {
-            batchable.draw();
+            batchable.endBatch();
             return true;
         }
 

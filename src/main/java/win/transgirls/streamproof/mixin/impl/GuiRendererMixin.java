@@ -8,17 +8,18 @@ import com.mojang.blaze3d.buffers.GpuBuffer;
 import com.mojang.blaze3d.buffers.GpuBufferSlice;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.systems.RenderPass;
+import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.VertexFormat;
-import net.minecraft.client.gui.ScreenRect;
+import net.minecraft.client.gui.navigation.ScreenRectangle;
+import net.minecraft.client.gui.render.GuiItemAtlas;
 import net.minecraft.client.gui.render.GuiRenderer;
-import net.minecraft.client.gui.render.SpecialGuiElementRenderer;
-import net.minecraft.client.gui.render.state.GuiRenderState;
-import net.minecraft.client.gui.render.state.ItemGuiElementRenderState;
-import net.minecraft.client.gui.render.state.SimpleGuiElementRenderState;
-import net.minecraft.client.gui.render.state.TextGuiElementRenderState;
-import net.minecraft.client.gui.render.state.special.SpecialGuiElementRenderState;
-import net.minecraft.client.render.BufferBuilder;
-import net.minecraft.client.texture.TextureSetup;
+import net.minecraft.client.gui.render.TextureSetup;
+import net.minecraft.client.gui.render.pip.PictureInPictureRenderer;
+import net.minecraft.client.renderer.state.gui.GuiElementRenderState;
+import net.minecraft.client.renderer.state.gui.GuiItemRenderState;
+import net.minecraft.client.renderer.state.gui.GuiRenderState;
+import net.minecraft.client.renderer.state.gui.GuiTextRenderState;
+import net.minecraft.client.renderer.state.gui.pip.PictureInPictureRenderState;
 import org.jspecify.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -43,14 +44,14 @@ public abstract class GuiRendererMixin {
     @Unique
     private final Set<GuiRenderer.Draw> streamproof$drawsToCapture = new HashSet<>();
     @Unique
-    private final Set<GuiRenderer.Preparation> streamproof$preparationsToCapture = new HashSet<>();
+    private final Set<GuiRenderer.MeshToDraw> streamproof$preparationsToCapture = new HashSet<>();
 
     @Unique
     private boolean streamproof$currentBatchIsStreamproof = false;
 
     @Shadow
     @Final
-    private List<GuiRenderer.Preparation> preparations;
+    private List<GuiRenderer.MeshToDraw> meshesToDraw;
 
     @Shadow
     @Final
@@ -58,29 +59,29 @@ public abstract class GuiRendererMixin {
 
     @Shadow
     @Nullable
-    public BufferBuilder buffer;
+    private BufferBuilder bufferBuilder;
 
     @Shadow
-    public abstract void endBuffer(BufferBuilder builder, RenderPipeline pipeline, TextureSetup textureSetup, @Nullable ScreenRect scissorArea);
+    protected abstract void recordMesh(BufferBuilder bufferBuilder, RenderPipeline pipeline, TextureSetup textureSetup, @Nullable ScreenRectangle scissorArea);
 
     @Shadow
-    public abstract BufferBuilder startBuffer(RenderPipeline pipeline);
-
-    @Shadow
-    @Nullable
-    public RenderPipeline pipeline;
+    protected abstract BufferBuilder getBufferBuilder(RenderPipeline pipeline);
 
     @Shadow
     @Nullable
-    public TextureSetup textureSetup;
+    private RenderPipeline previousPipeline;
 
     @Shadow
     @Nullable
-    public ScreenRect scissorArea;
+    private TextureSetup previousTextureSetup;
+
+    @Shadow
+    @Nullable
+    private ScreenRectangle previousScissorArea;
 
     @Shadow
     @Final
-    private GuiRenderState state;
+    private GuiRenderState renderState;
 
     @WrapMethod(method = "render(Lcom/mojang/blaze3d/buffers/GpuBufferSlice;)V")
     private void wrapRender(GpuBufferSlice fogBuffer, Operation<Void> original) {
@@ -94,16 +95,16 @@ public abstract class GuiRendererMixin {
     // (xNasuni):
     // TextGuiElementRenderState transitions into many GlyphGuiElementRenderState for each glyph during preparation
     // it's very important to keep tagging them because the GlyphGuiElementRenderStates are not added during writing
-    @WrapOperation(method = "prepareTextElements", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/render/state/GuiRenderState;forEachTextElement(Ljava/util/function/Consumer;)V"))
-    private void proxyPrepareTextElements(GuiRenderState instance, Consumer<TextGuiElementRenderState> textElementStateConsumer, Operation<Void> original) {
-        original.call(instance, (Consumer<TextGuiElementRenderState>) (state) -> {
-            int sizeBefore = instance.currentLayer.preparedTextElementRenderStates != null
-                    ? instance.currentLayer.preparedTextElementRenderStates.size()
+    @WrapOperation(method = "prepareText", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/state/gui/GuiRenderState;forEachText(Ljava/util/function/Consumer;)V"))
+    private void proxyPrepareTextElements(GuiRenderState instance, Consumer<GuiTextRenderState> consumer, Operation<Void> original) {
+        original.call(instance, (Consumer<GuiTextRenderState>) (state) -> {
+            int sizeBefore = instance.current.glyphStates != null
+                    ? instance.current.glyphStates.size()
                     : 0;
 
-            textElementStateConsumer.accept(state);
+            consumer.accept(state);
 
-            List<SimpleGuiElementRenderState> states = instance.currentLayer.preparedTextElementRenderStates;
+            List<GuiElementRenderState> states = instance.current.glyphStates;
             int sizeAfter = states != null ? states.size() : 0;
 
             if (sizeAfter > sizeBefore && Streamproof.renderStates.contains(state)) {
@@ -117,35 +118,35 @@ public abstract class GuiRendererMixin {
     // (xNasuni):
     // ItemGuiElementRenderState transitions into one SimpleGuiElementRenderState, but we should
     // handle more than one anyway just because it is possible this maybe changes in the future
-    @WrapMethod(method = "prepareItem")
-    private void wrapPrepareItem(ItemGuiElementRenderState state, float u, float v, int pixelsPerItem, int itemAtlasSideLength, Operation<Void> original) {
-        GuiRenderState.Layer currentLayer = this.state.currentLayer;
+    @WrapMethod(method = "submitBlitFromItemAtlas")
+    private void wrapPrepareItem(GuiItemRenderState itemState, GuiItemAtlas.SlotView slotView, Operation<Void> original) {
+        GuiRenderState.Node currentLayer = this.renderState.current;
 
-        int sizeBefore = currentLayer.simpleElementRenderStates != null
-                ? currentLayer.simpleElementRenderStates.size()
+        int sizeBefore = currentLayer.elementStates != null
+                ? currentLayer.elementStates.size()
                 : 0;
 
-        original.call(state, u, v, pixelsPerItem, itemAtlasSideLength);
+        original.call(itemState, slotView);
 
-        List<SimpleGuiElementRenderState> states = currentLayer.simpleElementRenderStates;
+        List<GuiElementRenderState> states = currentLayer.elementStates;
         int sizeAfter = states != null ? states.size() : 0;
 
-        if (sizeAfter > sizeBefore && Streamproof.renderStates.contains(state)) {
+        if (sizeAfter > sizeBefore && Streamproof.renderStates.contains(itemState)) {
             for (int i = sizeBefore; i < sizeAfter; i++) {
                 Streamproof.renderStates.add(states.get(i));
             }
         }
     }
 
-    @WrapOperation(method = "prepareSpecialElement", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/render/SpecialGuiElementRenderer;render(Lnet/minecraft/client/gui/render/state/special/SpecialGuiElementRenderState;Lnet/minecraft/client/gui/render/state/GuiRenderState;I)V"))
-    private <T extends SpecialGuiElementRenderState> void wrapPrepareSpecialElement(SpecialGuiElementRenderer<T> instance, T elementState, GuiRenderState state, int windowScaleFactor, Operation<Void> original) {
-        boolean isStreamproof = Streamproof.renderStates.contains(elementState);
+    @WrapOperation(method = "preparePictureInPictureState", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/render/pip/PictureInPictureRenderer;prepare(Lnet/minecraft/client/renderer/state/gui/pip/PictureInPictureRenderState;Lnet/minecraft/client/renderer/state/gui/GuiRenderState;I)V"))
+    private <T extends PictureInPictureRenderState> void wrapPrepareSpecialElement(PictureInPictureRenderer<T> instance, T renderState, GuiRenderState guiRenderState, int guiScale, Operation<Void> original) {
+        boolean isStreamproof = Streamproof.renderStates.contains(renderState);
         if (isStreamproof) {
             if (StreamproofAPI.getImpl() instanceof StreamproofImpl impl) {
                 impl.writing = true;
             }
         }
-        original.call(instance, elementState, state, windowScaleFactor);
+        original.call(instance, renderState, guiRenderState, guiScale);
         if (isStreamproof) {
             if (StreamproofAPI.getImpl() instanceof StreamproofImpl impl) {
                 impl.writing = false;
@@ -153,28 +154,28 @@ public abstract class GuiRendererMixin {
         }
     }
 
-    @Inject(method = "prepareSimpleElement", at = @At("HEAD"))
-    private void splitStreamproofBatches(SimpleGuiElementRenderState state, CallbackInfo ci) {
-        boolean elementIsStreamproof = Streamproof.renderStates.contains(state);
+    @Inject(method = "addElementToMesh", at = @At("HEAD"))
+    private void splitStreamproofBatches(GuiElementRenderState elementState, CallbackInfo ci) {
+        boolean elementIsStreamproof = Streamproof.renderStates.contains(elementState);
 
         if (elementIsStreamproof != this.streamproof$currentBatchIsStreamproof) {
-            if (this.buffer != null) {
-                this.endBuffer(this.buffer, this.pipeline, this.textureSetup, this.scissorArea);
+            if (this.bufferBuilder != null) {
+                this.recordMesh(this.bufferBuilder, this.previousPipeline, this.previousTextureSetup, this.previousScissorArea);
             }
 
             this.streamproof$currentBatchIsStreamproof = elementIsStreamproof;
 
-            this.buffer = this.startBuffer(state.pipeline());
-            this.pipeline = state.pipeline();
-            this.textureSetup = state.textureSetup();
-            this.scissorArea = state.scissorArea();
+            this.bufferBuilder = this.getBufferBuilder(elementState.pipeline());
+            this.previousPipeline = elementState.pipeline();
+            this.previousTextureSetup = elementState.textureSetup();
+            this.previousScissorArea = elementState.scissorArea();
         }
     }
 
-    @WrapOperation(method = "endBuffer", at = @At(value = "INVOKE", target = "Ljava/util/List;add(Ljava/lang/Object;)Z"))
-    private boolean tagFinishedPreparation(List<GuiRenderer.Preparation> instance, @Coerce Object e, Operation<Boolean> original) {
+    @WrapOperation(method = "recordMesh", at = @At(value = "INVOKE", target = "Ljava/util/List;add(Ljava/lang/Object;)Z"))
+    private boolean tagFinishedPreparation(List<GuiRenderer.MeshToDraw> instance, @Coerce Object e, Operation<Boolean> original) {
         boolean result = original.call(instance, e);
-        if (instance == this.preparations && e instanceof GuiRenderer.Preparation preparation) {
+        if (instance == this.meshesToDraw && e instanceof GuiRenderer.MeshToDraw preparation) {
             if (this.streamproof$currentBatchIsStreamproof) {
                 this.streamproof$preparationsToCapture.add(preparation);
             }
@@ -183,11 +184,11 @@ public abstract class GuiRendererMixin {
         return result;
     }
 
-    @WrapOperation(method = "finishPreparation", at = @At(value = "INVOKE", target = "Ljava/util/List;add(Ljava/lang/Object;)Z"))
-    private boolean carryTagToDraw(List<GuiRenderer.Draw> instance, @Coerce Object e, Operation<Boolean> original, @Local GuiRenderer.Preparation preparation) {
+    @WrapOperation(method = "recordDraws", at = @At(value = "INVOKE", target = "Ljava/util/List;add(Ljava/lang/Object;)Z"))
+    private boolean carryTagToDraw(List<GuiRenderer.Draw> instance, @Coerce Object e, Operation<Boolean> original, @Local(name = "meshToDraw") GuiRenderer.MeshToDraw meshToDraw) {
         boolean result = original.call(instance, e);
         if (instance == this.draws && e instanceof GuiRenderer.Draw draw) {
-            if (this.streamproof$preparationsToCapture.contains(preparation)) {
+            if (this.streamproof$preparationsToCapture.contains(meshToDraw)) {
                 this.streamproof$drawsToCapture.add(draw);
             }
         }
@@ -195,11 +196,11 @@ public abstract class GuiRendererMixin {
         return result;
     }
 
-    @WrapOperation(method = "render(Ljava/util/function/Supplier;Lnet/minecraft/client/gl/Framebuffer;Lcom/mojang/blaze3d/buffers/GpuBufferSlice;Lcom/mojang/blaze3d/buffers/GpuBufferSlice;Lcom/mojang/blaze3d/buffers/GpuBuffer;Lcom/mojang/blaze3d/vertex/VertexFormat$IndexType;II)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/render/GuiRenderer;render(Lnet/minecraft/client/gui/render/GuiRenderer$Draw;Lcom/mojang/blaze3d/systems/RenderPass;Lcom/mojang/blaze3d/buffers/GpuBuffer;Lcom/mojang/blaze3d/vertex/VertexFormat$IndexType;)V"))
-    private void applyStreamproofPass(GuiRenderer instance, GuiRenderer.Draw draw, RenderPass pass, GpuBuffer indexBuffer, VertexFormat.IndexType indexType, Operation<Void> original) {
+    @WrapOperation(method = "executeDrawRange(Ljava/util/function/Supplier;Lcom/mojang/blaze3d/pipeline/RenderTarget;Lcom/mojang/blaze3d/buffers/GpuBufferSlice;Lcom/mojang/blaze3d/buffers/GpuBufferSlice;Lcom/mojang/blaze3d/buffers/GpuBuffer;Lcom/mojang/blaze3d/vertex/VertexFormat$IndexType;II)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/render/GuiRenderer;executeDraw(Lnet/minecraft/client/gui/render/GuiRenderer$Draw;Lcom/mojang/blaze3d/systems/RenderPass;Lcom/mojang/blaze3d/buffers/GpuBuffer;Lcom/mojang/blaze3d/vertex/VertexFormat$IndexType;)V"))
+    private void applyStreamproofPass(GuiRenderer instance, GuiRenderer.Draw draw, RenderPass renderPass, GpuBuffer indexBuffer, VertexFormat.IndexType indexType, Operation<Void> original) {
         boolean isStreamproof = this.streamproof$drawsToCapture.contains(draw);
         if (isStreamproof) StreamproofAPI.start(RenderTarget.Gui);
-        original.call(instance, draw, pass, indexBuffer, indexType);
+        original.call(instance, draw, renderPass, indexBuffer, indexType);
         if (isStreamproof) StreamproofAPI.stop(RenderTarget.Gui);
     }
 }

@@ -150,7 +150,7 @@ public class Shader {
     }
 
     public void setDefaults() {
-        set("uResolution", Streamproof.window.getFramebufferWidth(), Streamproof.window.getFramebufferHeight());
+        set("uResolution", Streamproof.window.getWidth(), Streamproof.window.getHeight());
     }
 
     public void destroy() {

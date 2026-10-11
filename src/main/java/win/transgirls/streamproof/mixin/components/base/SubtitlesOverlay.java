@@ -2,17 +2,17 @@ package win.transgirls.streamproof.mixin.components.base;
 
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.hud.SubtitlesHud;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.components.SubtitleOverlay;
 import org.spongepowered.asm.mixin.Mixin;
 import win.transgirls.streamproof.api.StreamproofAPI;
 
-@Mixin(SubtitlesHud.class)
+@Mixin(SubtitleOverlay.class)
 public class SubtitlesOverlay {
-    @WrapMethod(method = "render")
-    private void wrapRenderSubtitles(DrawContext context, Operation<Void> original) {
+    @WrapMethod(method = "extractRenderState")
+    private void wrapRenderSubtitles(GuiGraphicsExtractor graphics, Operation<Void> original) {
         StreamproofAPI.begin("SUBTITLES");
-        original.call(context);
+        original.call(graphics);
         StreamproofAPI.end("SUBTITLES");
     }
 }
