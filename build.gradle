@@ -104,3 +104,21 @@ publishing {
     repositories {
     }
 }
+
+// helps my flowstate when developing :3
+def autopush = providers.environmentVariable("xNasuniStreamproofFlowStateAutopushScript")
+tasks.register('xNasuniStreamproofFlowStateAutopush', Exec) {
+    dependsOn tasks.named('jar')
+    onlyIf { autopush.isPresent() && !autopush.get().isBlank() }
+
+    workingDir = layout.projectDirectory.asFile
+
+    doFirst {
+        def builtJar = tasks.named('jar').get().archiveFile.get().asFile
+        commandLine 'powershell', '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', autopush.get(), builtJar.absolutePath
+    }
+}
+
+tasks.named('build') {
+    finalizedBy 'xNasuniStreamproofFlowStateAutopush'
+}
