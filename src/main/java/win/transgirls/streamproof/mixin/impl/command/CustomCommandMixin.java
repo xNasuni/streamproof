@@ -25,7 +25,6 @@ public class CustomCommandMixin {
     @WrapOperation(method = "renderSolid", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/SubmitNodeCollector$CustomGeometryRenderer;render(Lcom/mojang/blaze3d/vertex/PoseStack$Pose;Lcom/mojang/blaze3d/vertex/VertexConsumer;)V"))
     private void wrapCustomRenderSolid(SubmitNodeCollector.CustomGeometryRenderer instance, PoseStack.Pose matrixEntry, VertexConsumer vertexConsumer, Operation<Void> original, @Local(argsOnly = true) MultiBufferSource.BufferSource bufferSource, @Local(name = "entry") Map.Entry<RenderType, List<SubmitNodeStorage.CustomGeometrySubmit>> entry, @Local(name = "customGeometrySubmit") SubmitNodeStorage.CustomGeometrySubmit customGeometrySubmit) {
         boolean isStreamproof = Streamproof.renderCommands.contains(customGeometrySubmit);
-        VertexConsumer consumers = isStreamproof ? bufferSource.getBuffer(entry.getKey()) : vertexConsumer;
 
         if (isStreamproof) {
             if (StreamproofAPI.getImpl() instanceof StreamproofImpl impl) {
@@ -33,7 +32,7 @@ public class CustomCommandMixin {
             }
             StreamproofAPI.start(RenderTarget.World);
         }
-        original.call(instance, matrixEntry, consumers);
+        original.call(instance, matrixEntry, bufferSource.getBuffer(entry.getKey()));
         if (isStreamproof) {
             if (StreamproofAPI.getImpl() instanceof StreamproofImpl impl) {
                 impl.forceDraw(bufferSource);
@@ -43,9 +42,8 @@ public class CustomCommandMixin {
     }
 
     @WrapOperation(method = "renderTranslucent", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/SubmitNodeCollector$CustomGeometryRenderer;render(Lcom/mojang/blaze3d/vertex/PoseStack$Pose;Lcom/mojang/blaze3d/vertex/VertexConsumer;)V"))
-    private void wrapCustomRenderTranslucent(SubmitNodeCollector.CustomGeometryRenderer instance, PoseStack.Pose matrixEntry, VertexConsumer vertexConsumer, Operation<Void> original, @Local(argsOnly = true, name = "bufferSource") MultiBufferSource.BufferSource bufferSource, @Local(name = "entry") Map.Entry<RenderType, List<SubmitNodeStorage.CustomGeometrySubmit>> entry, @Local(name = "customGeometrySubmit") SubmitNodeStorage.CustomGeometrySubmit customGeometrySubmit) {
+    private void wrapCustomRenderTranslucent(SubmitNodeCollector.CustomGeometryRenderer instance, PoseStack.Pose matrixEntry, VertexConsumer vertexConsumer, Operation<Void> original, @Local(argsOnly = true) MultiBufferSource.BufferSource bufferSource, @Local(name = "entry") Map.Entry<RenderType, List<SubmitNodeStorage.CustomGeometrySubmit>> entry, @Local(name = "customGeometrySubmit") SubmitNodeStorage.CustomGeometrySubmit customGeometrySubmit) {
         boolean isStreamproof = Streamproof.renderCommands.contains(customGeometrySubmit);
-        VertexConsumer consumers = isStreamproof ? bufferSource.getBuffer(entry.getKey()) : vertexConsumer;
 
         if (isStreamproof) {
             if (StreamproofAPI.getImpl() instanceof StreamproofImpl impl) {
@@ -53,7 +51,7 @@ public class CustomCommandMixin {
             }
             StreamproofAPI.start(RenderTarget.World);
         }
-        original.call(instance, matrixEntry, consumers);
+        original.call(instance, matrixEntry, bufferSource.getBuffer(entry.getKey()));
         if (isStreamproof) {
             if (StreamproofAPI.getImpl() instanceof StreamproofImpl impl) {
                 impl.forceDraw(bufferSource);
