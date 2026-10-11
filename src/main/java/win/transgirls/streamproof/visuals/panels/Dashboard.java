@@ -60,6 +60,7 @@ public class Dashboard extends PanelInterface {
         this.renderEffects(EffectOrder.BeforeGui);
 
         ImGui.setNextWindowPos(io.getDisplaySizeX() / 2.0f, io.getDisplaySizeY() / 2.0f, ImGuiCond.Once);
+        ImGui.setNextWindowSize(560f, 480f, ImGuiCond.Once);
 
         ImGui.begin("Streamproof Internal", ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoScrollbar);
         this.renderEffects(EffectOrder.InGui);
