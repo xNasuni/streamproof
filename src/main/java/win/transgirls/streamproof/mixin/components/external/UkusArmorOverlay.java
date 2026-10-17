@@ -1,41 +1,24 @@
 package win.transgirls.streamproof.mixin.components.external;
 
+import com.bawnorton.mixinsquared.TargetHandler;
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
-import net.minecraft.util.profiler.DummyProfiler;
-import net.minecraft.util.profiler.Profiler;
-import net.minecraft.util.profiler.ProfilerSystem;
-import net.minecraft.util.profiler.TracyProfiler;
+import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.hud.InGameHud;
+import net.minecraft.client.render.RenderTickCounter;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import win.transgirls.streamproof.Streamproof;
 import win.transgirls.streamproof.api.StreamproofAPI;
 
-import java.util.List;
-
-@Mixin({DummyProfiler.class, ProfilerSystem.class, TracyProfiler.class, Profiler.UnionProfiler.class})
+@Mixin(value = InGameHud.class, priority = 1500)
 public abstract class UkusArmorOverlay {
-    @Inject(method = "push(Ljava/lang/String;)V", at = @At("TAIL"))
-    private void tailPush(String location, CallbackInfo ci) {
-        Profiler profiler = (Profiler) this;
-        List<String> stack = Streamproof.stackFor(profiler);
-
-        stack.add(location);
-        if (location.equals("ukus-armor-hud")) {
-            StreamproofAPI.begin("UKUS_ARMOR_HUD");
-        }
-    }
-
-    @Inject(method = "pop()V", at = @At("TAIL"))
-    private void wrapPop(CallbackInfo ci) {
-        Profiler profiler = (Profiler) this;
-        List<String> stack = Streamproof.stackFor(profiler);
-
-        String location = stack.isEmpty() ? null : stack.removeLast();
-        if ("ukus-armor-hud".equals(location)) {
-            StreamproofAPI.end("UKUS_ARMOR_HUD");
-        }
+    @TargetHandler(
+            mixin = "ru.berdinskiybear.armorhud.mixin.MixinGui",
+            name = "drawArmorHud"
+    )
+    @WrapMethod(method = "@MixinSquared:Handler")
+    private void wrapDrawArmorHud(DrawContext graphics, RenderTickCounter tickCounter, Operation<Void> original) {
+        StreamproofAPI.begin("UKUS_ARMOR_HUD");
+        original.call(graphics, tickCounter);
+        StreamproofAPI.end("UKUS_ARMOR_HUD");
     }
 }

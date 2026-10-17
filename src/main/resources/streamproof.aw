@@ -22,3 +22,9 @@ accessible field net/minecraft/client/render/command/CustomCommandRenderer$Comma
 accessible field net/minecraft/client/render/VertexConsumerProvider$Immediate pending Ljava/util/Map;
 accessible field net/minecraft/client/render/VertexConsumerProvider$Immediate currentLayer Lnet/minecraft/client/render/RenderLayer;
 accessible field net/minecraft/client/render/BufferBuilder building Z
+accessible field net/minecraft/client/render/command/RenderDispatcher blockRenderManager Lnet/minecraft/client/render/block/BlockRenderManager;
+accessible field net/minecraft/client/render/command/RenderDispatcher vertexConsumers Lnet/minecraft/client/render/VertexConsumerProvider$Immediate;
+accessible field net/minecraft/client/render/command/RenderDispatcher atlasManager Lnet/minecraft/client/texture/AtlasManager;
+accessible field net/minecraft/client/render/command/RenderDispatcher outlineVertexConsumers Lnet/minecraft/client/render/OutlineVertexConsumerProvider;
+accessible field net/minecraft/client/render/command/RenderDispatcher crumblingOverlayVertexConsumers Lnet/minecraft/client/render/VertexConsumerProvider$Immediate;
+accessible field net/minecraft/client/render/command/RenderDispatcher textRenderer Lnet/minecraft/client/font/TextRenderer;
