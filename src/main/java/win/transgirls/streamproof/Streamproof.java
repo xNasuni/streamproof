@@ -13,7 +13,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.state.gui.ScreenArea;
 import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvent;
-import net.minecraft.util.profiling.ProfilerFiller;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.lwjgl.glfw.GLFW;
@@ -35,7 +34,9 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class Streamproof implements ClientModInitializer {
     @SuppressWarnings("unused")
@@ -62,11 +63,6 @@ public class Streamproof implements ClientModInitializer {
     public static Set<ScreenArea> renderStates = new HashSet<>();
     public static Set<Object> renderCommands = new HashSet<>();
     public static Shader overlayShader;
-    private static final Map<ProfilerFiller, List<String>> STACKS = new WeakHashMap<>();
-
-    public static List<String> stackFor(ProfilerFiller profiler) {
-        return STACKS.computeIfAbsent(profiler, _ -> new ArrayList<>());
-    }
 
     private static boolean anyClassLoaded(List<String> classList) {
         if (classList == null || classList.isEmpty()) return true;
