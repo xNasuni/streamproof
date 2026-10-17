@@ -127,6 +127,7 @@ public class Streamproof implements ClientModInitializer {
 
         if (anyClassLoaded(List.of("fi.dy.masa.litematica.render.LitematicaRenderer"))) {
             StreamproofAPI.add("LITEMATICA_WORLD_OVERLAY", "Litematica's World Overlay", ComponentCategory.World, true);
+            StreamproofAPI.add("LITEMATICA_GUI_OVERLAY", "Litematica's Gui Overlay", ComponentCategory.Gui, true);
         }
     }
 

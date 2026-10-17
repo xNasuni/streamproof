@@ -26,6 +26,7 @@
     "components.base.world.WorldMap",
     "components.external.AppleSkinOverlay",
     "components.external.InventoryHudOverlay",
+    "components.external.LitematicaGuiOverlay",
     "components.external.LitematicaOutlineOverlay",
     "components.external.LitematicaWorldOverlay",
     "components.external.UkusArmorOverlay",
