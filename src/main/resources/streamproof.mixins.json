@@ -26,6 +26,8 @@
     "components.base.world.WorldMap",
     "components.external.AppleSkinOverlay",
     "components.external.InventoryHudOverlay",
+    "components.external.LitematicaOutlineOverlay",
+    "components.external.LitematicaWorldOverlay",
     "components.external.UkusArmorOverlay",
     "components.external.XaerosMinimapOverlay",
     "components.external.XaerosWaypointOverlay",

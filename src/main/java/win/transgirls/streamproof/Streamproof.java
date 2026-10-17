@@ -124,6 +124,10 @@ public class Streamproof implements ClientModInitializer {
         if (anyClassLoaded(List.of("squeek.appleskin.client.HUDOverlayHandler"))) {
             StreamproofAPI.add("APPLE_SKIN_OVERLAY", "Apple Skin's Overlay", ComponentCategory.Gui, true);
         }
+
+        if (anyClassLoaded(List.of("fi.dy.masa.litematica.render.LitematicaRenderer"))) {
+            StreamproofAPI.add("LITEMATICA_WORLD_OVERLAY", "Litematica's World Overlay", ComponentCategory.World, true);
+        }
     }
 
     @Override
