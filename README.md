@@ -1,3 +1,5 @@
+##### tags: hide minecraft gui in obs, hide gui in obs, hide gui only on stream
+
 ## Streamproof
 <img src="src/main/resources/assets/streamproof/icon.png" width="160px" align="right"/>
 
