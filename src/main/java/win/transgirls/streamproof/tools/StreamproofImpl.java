@@ -129,7 +129,7 @@ public class StreamproofImpl implements Impl {
     public void composite() {
         try {
             if (this.overlay != null) {
-                if (mc.screen == null || mc.screen instanceof ChatScreen || mc.screen instanceof GameModeSwitcherScreen) {
+                if (mc.gui.screen() == null || mc.gui.screen() instanceof ChatScreen || mc.gui.screen() instanceof GameModeSwitcherScreen) {
                     GL.saveRenderFlags();
 
                     if (this.worldFb.colorTexture != -1) {

@@ -60,7 +60,7 @@ public class GL {
     }
 
     public static void enableBlend() {
-        GlStateManager._enableBlend();
+        GlStateManager._enableBlend(0);
     }
 
     public static void disableScissor() {
@@ -68,7 +68,7 @@ public class GL {
     }
 
     public static void disableBlend() {
-        GlStateManager._disableBlend();
+        GlStateManager._disableBlend(0);
     }
 
     public static void setDefaultPixelStore() {
@@ -166,15 +166,15 @@ public class GL {
     }
 
     public static void saveRenderFlags() {
-        lastBlend = GlStateManager.BLEND.mode.enabled;
+        lastBlend = GlStateManager.BLEND[0].mode.enabled;
         lastCullFace = GlStateManager.CULL.enable.enabled;
         lastDepthTest = GlStateManager.DEPTH.mode.enabled;
         lastScissorTest = GlStateManager.SCISSOR.mode.enabled;
     }
 
     public static void restoreRenderFlags() {
-        if (lastBlend) GlStateManager._enableBlend();
-        else GlStateManager._disableBlend();
+        if (lastBlend) GlStateManager._enableBlend(0);
+        else GlStateManager._disableBlend(0);
         if (lastCullFace) GlStateManager._enableCull();
         else GlStateManager._disableCull();
         if (lastDepthTest) GlStateManager._enableDepthTest();

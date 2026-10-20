@@ -16,7 +16,7 @@ public class MouseMain {
     public static HashMap<Integer, Integer> glfwInputModeSave = new HashMap<>();
 
     public static void lockCursor() {
-        if (mc.screen != null) {
+        if (mc.gui.screen() != null) {
             return;
         }
 

@@ -3,12 +3,6 @@ package win.transgirls.streamproof.tools;
 import com.sun.jna.Function;
 import com.sun.jna.Pointer;
 import com.sun.jna.ptr.PointerByReference;
-import win.transgirls.streamproof.Streamproof;
-import win.transgirls.streamproof.api.StreamproofAPI;
-import win.transgirls.streamproof.types.Kernel32;
-import win.transgirls.streamproof.types.MinHook;
-import win.transgirls.streamproof.types.ResultToast;
-
 import java.util.Arrays;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -16,9 +10,13 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
-
-import static win.transgirls.streamproof.Streamproof.mc;
+import win.transgirls.streamproof.Streamproof;
+import win.transgirls.streamproof.api.StreamproofAPI;
+import win.transgirls.streamproof.types.Kernel32;
+import win.transgirls.streamproof.types.MinHook;
+import win.transgirls.streamproof.types.ResultToast;
 import static win.transgirls.streamproof.Streamproof.LOGGER;
+import static win.transgirls.streamproof.Streamproof.mc;
 import static win.transgirls.streamproof.Streamproof.minhook;
 
 public class SwapBufferHook {
@@ -30,7 +28,7 @@ public class SwapBufferHook {
     private Pointer target;
     private final AtomicInteger hookCount = new AtomicInteger();
     private byte[] signature;
-    private ScheduledExecutorService guardian;
+    private final ScheduledExecutorService guardian;
     @SuppressWarnings("FieldCanBeLocal")
     private final MinHook.GlSwapBuffers hookCallback;
 
@@ -95,7 +93,7 @@ public class SwapBufferHook {
 
         mc.execute(() -> {
             mc.getSoundManager().play(SimpleSoundInstance.forUI(success ? Streamproof.successSound : Streamproof.failureSound, 1.0f));
-            mc.getToastManager().addToast(new ResultToast(Component.literal(message), success));
+            mc.gui.toastManager().addToast(new ResultToast(Component.literal(message), success));
         });
     }
 
