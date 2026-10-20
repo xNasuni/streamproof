@@ -46,12 +46,11 @@ dependencies {
     implementation "io.github.spair:imgui-java-natives-windows:${project.imguiVersion}"
     include "io.github.spair:imgui-java-natives-windows:${project.imguiVersion}"
 
-    compileOnly files('libs/inventoryhud.fabric.26.1.2-3.4.31.jar')
-    compileOnly files('libs/xaerominimap-fabric-26.1.2-26.6.0.jar')
-    compileOnly files('libs/ukus-armor-hud-fabric-0.11.0+mc26.1.jar')
-    compileOnly files('libs/appleskin-fabric-mc26.1.2-3.0.10.jar')
-    compileOnly files('libs/ImmediatelyFast-Fabric-1.15.3+26.1.jar')
-    compileOnly files('libs/litematica-fabric-26.1.2-0.27.14.jar')
+    compileOnly files('libs/inventoryhud.fabric.26.2-3.4.34.jar')
+    compileOnly files('libs/xaerominimap-fabric-26.2-26.6.0.jar')
+    compileOnly files('libs/ukus-armor-hud-fabric-0.12.0+mc26.2.jar')
+    compileOnly files('libs/appleskin-fabric-mc26.2-3.0.10.jar')
+    compileOnly files('libs/litematica-fabric-26.2-0.28.8.jar')
 
     include(implementation(annotationProcessor("com.github.bawnorton.mixinsquared:mixinsquared-fabric:0.3.7")))
 
