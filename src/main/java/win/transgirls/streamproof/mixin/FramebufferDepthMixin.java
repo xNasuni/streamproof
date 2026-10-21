@@ -15,13 +15,13 @@ import win.transgirls.streamproof.tools.StreamproofImpl;
 @Mixin(GameRenderer.class)
 public class FramebufferDepthMixin {
     @WrapOperation(method = "renderLevel", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/CommandEncoder;clearDepthTexture(Lcom/mojang/blaze3d/textures/GpuTexture;D)V"))
-    private void wrapClearDepthBuffer(CommandEncoder encoder, GpuTexture _depthTexture, double v, Operation<Void> original) {
+    private void wrapClearDepthBuffer(CommandEncoder encoder, GpuTexture depthTexture, double clearDepth, Operation<Void> original) {
         if (StreamproofAPI.getImpl() instanceof StreamproofImpl impl && impl.worldFb != null && impl.worldFb.depthTexture != 0) {
-            if (_depthTexture instanceof GlTexture depthTexture) {
-                GL.copyDepth(depthTexture.glId(), impl.worldFb.depthTexture, depthTexture.getWidth(0), depthTexture.getHeight(0));
+            if (depthTexture instanceof GlTexture glDepthTexture) {
+                GL.copyDepth(glDepthTexture.glId(), impl.worldFb.depthTexture, glDepthTexture.getWidth(0), glDepthTexture.getHeight(0));
             }
         }
 
-        original.call(encoder, _depthTexture, v);
+        original.call(encoder, depthTexture, clearDepth);
     }
 }

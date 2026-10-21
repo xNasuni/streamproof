@@ -18,12 +18,4 @@ accessible class com/mojang/blaze3d/opengl/GlStateManager$BlendState
 accessible class com/mojang/blaze3d/opengl/GlStateManager$CullState
 accessible class com/mojang/blaze3d/opengl/GlStateManager$DepthState
 accessible class com/mojang/blaze3d/opengl/GlStateManager$ScissorState
-accessible field net/minecraft/client/renderer/feature/CustomFeatureRenderer$Storage solidCustomGeometrySubmits Ljava/util/Map;
-accessible field net/minecraft/client/renderer/feature/CustomFeatureRenderer$Storage translucentCustomGeometrySubmits Ljava/util/Map;
-accessible field net/minecraft/client/renderer/feature/FeatureRenderDispatcher modelManager Lnet/minecraft/client/resources/model/ModelManager;
-accessible field net/minecraft/client/renderer/feature/FeatureRenderDispatcher bufferSource Lnet/minecraft/client/renderer/MultiBufferSource$BufferSource;
-accessible field net/minecraft/client/renderer/feature/FeatureRenderDispatcher atlasManager Lnet/minecraft/client/resources/model/sprite/AtlasManager;
-accessible field net/minecraft/client/renderer/feature/FeatureRenderDispatcher outlineBufferSource Lnet/minecraft/client/renderer/OutlineBufferSource;
-accessible field net/minecraft/client/renderer/feature/FeatureRenderDispatcher crumblingBufferSource Lnet/minecraft/client/renderer/MultiBufferSource$BufferSource;
-accessible field net/minecraft/client/renderer/feature/FeatureRenderDispatcher font Lnet/minecraft/client/gui/Font;
-accessible field net/minecraft/client/renderer/feature/FeatureRenderDispatcher gameRenderState Lnet/minecraft/client/renderer/state/GameRenderState;
+accessible class net/minecraft/client/renderer/feature/FeatureRenderDispatcher$PreparedGroup

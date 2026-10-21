@@ -15,9 +15,9 @@ import net.minecraft.client.Screenshot;
 @Mixin(Screenshot.class)
 public class ScreenshotMixin {
     @WrapMethod(method = "takeScreenshot(Lcom/mojang/blaze3d/pipeline/RenderTarget;ILjava/util/function/Consumer;)V")
-    private static void wrapTakeScreenshot(RenderTarget framebuffer, int downscaleFactor, Consumer<NativeImage> callback, Operation<Void> original) {
+    private static void wrapTakeScreenshot(RenderTarget target, int downscaleFactor, Consumer<NativeImage> callback, Operation<Void> original) {
         if (StreamproofAPI.isStreamproof("STREAMPROOF_SCREENSHOTS")) {
-            original.call(framebuffer, downscaleFactor, callback);
+            original.call(target, downscaleFactor, callback);
         } else {
             if (Streamproof._global_impl instanceof StreamproofImpl impl && impl.isReady()) {
                 impl.screenshotRunners.add(callback);
