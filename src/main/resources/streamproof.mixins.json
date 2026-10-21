@@ -37,11 +37,10 @@
     "imgui.GlfwInputMixin",
     "imgui.ImGuiDrawMixin",
     "impl.GuiRendererMixin",
+    "impl.PhaseSubmitGrouperMixin",
+    "impl.PreparedGroupMixin",
     "impl.RenderLayerMixin",
-    "impl.RenderQueueMixin",
-    "impl.command.CustomCommandMixin",
-    "impl.command.ItemCommandMixin",
-    "impl.command.LayeredCustomCommandMixin",
-    "impl.command.TextCommandMixin"
+    "impl.SimpleFeatureRenderPhaseMixin",
+    "impl.TranslucentFeatureRenderPhaseMixin"
   ]
 }

@@ -19,6 +19,7 @@ import org.lwjgl.glfw.GLFW;
 import win.transgirls.streamproof.api.StreamproofAPI;
 import win.transgirls.streamproof.api.types.ComponentCategory;
 import win.transgirls.streamproof.api.types.Impl;
+import win.transgirls.streamproof.api.types.RenderTarget;
 import win.transgirls.streamproof.imgui.ImGuiImplementation;
 import win.transgirls.streamproof.input.KeyAction;
 import win.transgirls.streamproof.input.KeyboardMain;
@@ -35,6 +36,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashSet;
+import java.util.IdentityHashMap;
+import java.util.Map;
 import java.util.List;
 import java.util.Set;
 
@@ -61,7 +64,7 @@ public class Streamproof implements ClientModInitializer {
     public static Window window;
 
     public static Set<ScreenArea> renderStates = new HashSet<>();
-    public static Set<Object> renderCommands = new HashSet<>();
+    public static Map<Object, RenderTarget> renderCommands = new IdentityHashMap<>();
     public static Shader overlayShader;
 
     private static boolean anyClassLoaded(List<String> classList) {

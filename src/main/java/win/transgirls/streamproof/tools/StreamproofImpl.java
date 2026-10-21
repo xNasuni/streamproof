@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.function.Consumer;
 import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.client.gui.screens.debug.GameModeSwitcherScreen;
-import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.feature.submit.SubmitNode;
 
 import static win.transgirls.streamproof.Streamproof.LOGGER;
 import static win.transgirls.streamproof.Streamproof.mc;
@@ -29,6 +29,7 @@ public class StreamproofImpl implements Impl {
     public StreamproofFramebuffer worldFb;
     public StreamproofFramebuffer guiFb;
     public boolean writing;
+    public RenderTarget writingTarget = RenderTarget.Gui;
     public Shader overlay;
 
     public ArrayList<Consumer<NativeImage>> screenshotRunners = new ArrayList<>();
@@ -84,6 +85,7 @@ public class StreamproofImpl implements Impl {
     public void begin(String label) {
         if (this.isStreamproof(label)) {
             this.writing = true;
+            this.writingTarget = this.getRenderTarget(label);
         }
     }
 
@@ -116,13 +118,9 @@ public class StreamproofImpl implements Impl {
         }
     }
 
-    public void forceDraw(MultiBufferSource consumer) {
-        if (Streamproof.immediatelyFastLoaded && ImmediatelyFastCompat.forceDraw(consumer)) {
-            return;
-        }
-
-        if (consumer instanceof MultiBufferSource.BufferSource immediate) {
-            immediate.endBatch();
+    public void tagSubmit(SubmitNode submit) {
+        if (this.writing) {
+            Streamproof.renderCommands.put(submit, this.writingTarget);
         }
     }
 
