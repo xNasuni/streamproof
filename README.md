@@ -10,7 +10,7 @@ Streamproof is a fabric windows-only mod that lets you hide specific things from
 
 | platform | link |
 | --- | --- |
-| <img src="https://modrinth.com/favicon.ico" width="24px" align="left"> Modrinth | [Download](https://modrinth.com/mod/streamproof/versions/) |
+| <img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/modrinth.png" width="24px" align="left"> Modrinth | [Download](https://modrinth.com/mod/streamproof/versions/) |
 | <img src="https://github.githubassets.com/favicons/favicon-dark.svg" width="24px" align="left"> GitHub | [Download](https://github.com/xNasuni/streamproof/releases/latest) |
 
 #### Help
